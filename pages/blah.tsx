@@ -1,7 +1,7 @@
 import React from 'react';
-import Link from 'next/link';
 import Head from 'next/head';
 import styles from './blah.module.scss';
+import Link from '../components/Link';
 
 // testing css modules, delete when done
 export default function Blah() {
@@ -13,6 +13,6 @@ export default function Blah() {
       <span className={styles.things}>Hi!</span>
       other things here...
     </p>
-    <p><Link href="/"><a>go home</a></Link></p>
+    <p><Link href="/">go home</Link></p>
   </div>;
 }

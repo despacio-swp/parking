@@ -1,10 +1,6 @@
 import React from 'react';
-import Link from 'next/link';
 import Head from 'next/head';
-
-const ListLink: React.FunctionComponent<{ target: string }> = ({ target }) => {
-  return <li><Link href={'/' + target}><a>{target}</a></Link></li>
-}
+import ListLink from '../components/ListLink';
 
 export default function App() {
   return <div>
