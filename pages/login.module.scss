@@ -1,10 +1,7 @@
-.centeredBox {
-    display: flex;
-    flex-direction: column;
+.loginBox {
     margin: auto;
     width: 500px;
     height: auto;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    box-shadow: 0 0 5px;
-    border-radius: 5px;
+    margin-top: 50px;
+    padding: 30px;
 }

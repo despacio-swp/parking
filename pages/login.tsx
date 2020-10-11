@@ -2,7 +2,7 @@ import React from 'react';
 import Head from 'next/head';
 import Button from '@material-ui/core/Button';
 import AppMenu from '../components/AppMenu';
-import { Box, TextField, Typography } from '@material-ui/core';
+import { Paper, Box, TextField, Typography, Grid } from '@material-ui/core';
 import styles from './login.module.scss';
 
 // testing css modules, delete when done
@@ -12,18 +12,30 @@ export default function Login() {
       <title>example test</title>
     </Head>
     <AppMenu page="Login" />
-    <Box className={styles.centeredBox} mt="50px" padding={3}>
-      <Typography variant="h5" align="center">Login</Typography>
-      <TextField id="standard-basic" label="Email" />
-      <TextField id="standard-basic" label="Password" />
-      <Box display="flex" flexDirection="row" justifyContent="space-between" mt="20px">
-        <Button color="primary">
-          Register
-        </Button>
-        <Button variant="contained" color="primary">
-          Login
-        </Button>
-      </Box>
-    </Box>
+    <Paper className={styles.loginBox} elevation={3}>
+      <Grid container spacing={2} direction="column">
+        <Grid item>
+          <Typography variant="h5" align="center">Login</Typography>
+        </Grid>
+        <Grid item>
+          <TextField id="standard-basic" label="Email" fullWidth={true} />
+        </Grid>
+        <Grid item>
+          <TextField id="standard-basic" label="Password" fullWidth={true} />
+        </Grid>
+        <Grid item container justify="space-between">
+          <Grid item>
+            <Button color="primary">
+              Register
+            </Button>
+          </Grid>
+          <Grid item>
+            <Button variant="contained" color="primary">
+              Login
+            </Button>
+          </Grid>
+        </Grid>
+      </Grid>
+    </Paper>
   </React.Fragment>;
 }

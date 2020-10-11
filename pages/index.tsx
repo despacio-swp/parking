@@ -10,7 +10,7 @@ export default function App() {
     <h2>Index of random stuff</h2>
     <ul>
       <ListLink target="blah" />
-      <ListLink target="test" />
+      <ListLink target="login" />
     </ul>
   </div>;
 }
