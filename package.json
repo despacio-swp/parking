@@ -4,8 +4,8 @@
   "description": "A lot of boilerplate",
   "private": true,
   "scripts": {
-    "start": "tsc -p server; node build/server.js",
-    "build": "tsc -p server; next build",
+    "start": "tsc -p server && node build/server.js",
+    "build": "tsc -p server && next build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
