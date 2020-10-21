@@ -1,6 +1,7 @@
 import React from 'react';
 import App, { AppInitialProps } from 'next/app';
-import { CssBaseline, ThemeProvider } from '@material-ui/core';
+import Head from 'next/head';
+import { CssBaseline, StylesProvider, ThemeProvider } from '@material-ui/core';
 import theme from '../client/theme';
 
 // roboto font
@@ -27,11 +28,17 @@ export default class OverriddenApp extends App<AppInitialProps> {
 
   render() {
     const { Component, pageProps } = this.props;
-    return (
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Component {...pageProps} />
-      </ThemeProvider>
-    );
+    return <>
+      <Head>
+        <meta name="viewport"
+          content="minimum-scale=1, initial-scale=1, width=device-width" />
+      </Head>
+      <StylesProvider injectFirst>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <Component {...pageProps} />
+        </ThemeProvider>
+      </StylesProvider>
+    </>;
   }
 }

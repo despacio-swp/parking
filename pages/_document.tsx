@@ -3,6 +3,9 @@
 import React from 'react';
 import Document, { Html, Head, Main, NextScript } from 'next/document';
 import { ServerStyleSheets } from '@material-ui/core/styles';
+// you see, postcss would be a dev dependency were it not actively needed in
+// rendering pretty much every single page
+import cssnano from 'cssnano';
 import theme from '../client/theme';
 
 export default class MyDocument extends Document {
@@ -12,8 +15,6 @@ export default class MyDocument extends Document {
         <Head>
           {/* PWA primary color */}
           <meta name="theme-color" content={theme.palette.primary.main} />
-          <meta name="viewport"
-            content="minimum-scale=1, initial-scale=1, width=device-width" />
         </Head>
         <body>
           <Main />
@@ -22,6 +23,17 @@ export default class MyDocument extends Document {
       </Html>
     );
   }
+}
+
+const IS_DEV = process.env.NODE_ENV !== 'production';
+const postcssOpts = {
+  from: 'material-ui-base.css',
+  map: IS_DEV ? { inline: true } : false
+};
+const cssnanoOpts = { preset: 'default' };
+async function minifyCss(input: string): Promise<string> {
+  let output = await cssnano.process(input, postcssOpts, cssnanoOpts);
+  return output.css;
 }
 
 // `getInitialProps` belongs to `_document` (instead of `_app`),
@@ -60,9 +72,16 @@ MyDocument.getInitialProps = async ctx => {
 
   const initialProps = await Document.getInitialProps(ctx);
 
+  let css = sheets.toString();
+  let minifiedCss = await minifyCss(css);
+
   return {
     ...initialProps,
     // Styles fragment is rendered after the app and page rendering finish.
-    styles: [...React.Children.toArray(initialProps.styles), sheets.getStyleElement()]
+    styles: [
+      <style id="jss-server-side" key="jss-server-side"
+        dangerouslySetInnerHTML={{ __html: minifiedCss }} />,
+      ...React.Children.toArray(initialProps.styles)
+    ]
   };
 };

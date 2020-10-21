@@ -5,11 +5,10 @@ import AppMenu from '../components/AppMenu';
 import { Paper, Box, TextField, Typography, Grid } from '@material-ui/core';
 import styles from './login.module.scss';
 
-// testing css modules, delete when done
 export default function Login() {
   return <React.Fragment>
     <Head>
-      <title>example test</title>
+      <title>login page</title>
     </Head>
     <AppMenu page="Login" />
     <Paper className={styles.loginBox} elevation={3}>
