@@ -1,4 +1,3 @@
-// @ts-check
 import express from 'express';
 import morgan from 'morgan';
 import next from 'next';

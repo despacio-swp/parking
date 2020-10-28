@@ -1,15 +1,32 @@
-// @ts-check
-import winston from 'winston';
-const env = process.env;
+import winston, { Logform, format, transports } from 'winston';
+import { formatWithOptions } from 'util';
+import { LOG_LEVEL, LOG_COLORS } from './config';
 
-let logger = winston.createLogger({
-  level: env.LOG_LEVEL || 'info',
+const FORMAT_OPTIONS = {
+  depth: null,
+  maxArrayLength: null,
+  colors: LOG_COLORS
+};
+
+export let logger = winston.createLogger({
+  level: LOG_LEVEL,
   transports: [
-    new winston.transports.Console()
+    new transports.Console()
   ],
-  format: winston.format.combine(
-    winston.format.colorize(),
-    winston.format.simple()
+  format: format.combine(
+    LOG_COLORS
+      ? format.colorize()
+      : format.uncolorize(),
+    format.printf((info: Logform.TransformableInfo) => {
+      // @ts-ignore typescript pls
+      let splat = info[Symbol.for('splat')];
+      return [
+        `${info.level}:`,
+        splat
+          ? formatWithOptions(FORMAT_OPTIONS, info.message, ...splat)
+          : formatWithOptions(FORMAT_OPTIONS, info.message)
+      ].join(' ');
+    })
   )
 });
 

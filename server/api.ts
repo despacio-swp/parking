@@ -1,4 +1,3 @@
-// @ts-check
 import express from 'express';
 import log from './logger';
 import { wrapAsync as wrap } from './common';
