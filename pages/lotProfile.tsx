@@ -9,7 +9,7 @@ export default function profile() {
   return <React.Fragment>
     <Head>
       <title>Lot Profile</title>
-    </Head>;
+    </Head>
     <AppMenu page="Lot Profile" />
     <Paper className={styles.profileBox} elevation = {3}>
       <Grid>

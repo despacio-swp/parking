@@ -32,10 +32,10 @@ Promise<{ userId: string, token: string} | null> {
   let sessionToken: string | undefined = req.cookies.session;
   if (!sessionToken) {
     log.verbose('authenticated endpoint called without session');
-    res.status(400).send({
+    res.status(401).send({
       status: 'error',
       error: 'NO_SESSION',
-      description: 'a session was not provided'
+      description: 'no session exists'
     });
     return null;
   }
@@ -204,6 +204,7 @@ router.post('/register', wrapAsync(async (req, res) => {
   }
 
   let userId = generateUuid();
+  // TODO: verify emails are actually valid, http://emailregex.com
   let email = req.body.email.toLowerCase();
   let { password, firstName, lastName } = req.body;
   // TODO: do a select here first to avoid expensive hash if account already exists

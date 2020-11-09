@@ -11,16 +11,15 @@ import styles from './searchLots.module.scss';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import Button from '@material-ui/core/Button';
 import pool from '../server/db';
+import Link from 'next/link';
 
 export default function Search(this: any) {
-
   const [dense, setDense] = React.useState(false);
   const [secondary, setSecondary] = React.useState(false);
-  const [filter, setFilter] = React.useState({
-    filter: ""});
+  const [filter, setFilter] = React.useState({ filter: '' });
 
 
-    /*const getEntries = () => {
+  /* const getEntries = () => {
       return new Promise(function(resolve, reject) {
         pool.query('SELECT * FROM lot ORDER BY id ASC', (error, results) => {
           if (error) {
@@ -28,21 +27,21 @@ export default function Search(this: any) {
           }
           resolve(results.rows);
         })
-      }) 
+      })
     }*/
 
   function renderEntries(element: JSX.Element) {
-    //let vals = getEntries;
-    return [0, 1, 2, 3, 4, 5].map((value) =>
+    // let vals = getEntries;
+    return [0, 1, 2, 3, 4, 5].map(value =>
       React.cloneElement(element, {
-        key: value,
+        key: value
       }),
     );
   }
 
   const onchange = (e: any) => {
-    this.setFilter({search : e.target.value});
-  }
+    this.setFilter({ search: e.target.value });
+  };
 
   return <React.Fragment>
     <Head>
@@ -54,17 +53,19 @@ export default function Search(this: any) {
       <List className={styles.searchResult}>
         {renderEntries(
           <Box className={styles.searchBox} boxShadow={3}>
-          <ListItem>
-            <ListItemText
-              primary={"Generated Sample Parking Lot"}
-              secondary={secondary ? 'Secondary text' : null}
-            />
-            <ListItemSecondaryAction>
-              <Button variant="contained" color="primary">
-                Select
-              </Button>
-            </ListItemSecondaryAction>
-          </ListItem>,
+            <ListItem>
+              <ListItemText
+                primary={'Generated Sample Parking Lot'}
+                secondary={secondary ? 'Secondary text' : null}
+              />
+              <ListItemSecondaryAction>
+                <Link href="/lotProfile" passHref>
+                  <Button variant="contained" color="primary">
+                    Select
+                  </Button>
+                </Link>
+              </ListItemSecondaryAction>
+            </ListItem>
           </Box>
         )}
       </List>
