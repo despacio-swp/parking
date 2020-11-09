@@ -1,15 +1,15 @@
 import express from 'express';
-import log from './logger';
 import { wrapAsync as wrap } from './common';
+import counterRouter from './api/counter';
+import accountsRouter from './api/accounts';
 
 let router = express.Router(); // eslint-disable-line new-cap
 
-router.get('/', wrap(async (req, res) => {
-  log.info('a request!');
-  res.send('hello, world!');
+router.get('/v1', wrap(async (req, res) => {
+  res.send({ status: 'ok' });
 }));
 
-import counterRoute from './api/counter';
-router.use('/counter', counterRoute);
+router.use('/v1/counter', counterRouter);
+router.use('/v1/accounts', accountsRouter);
 
 export default router;

@@ -1,11 +1,17 @@
 CREATE TABLE accounts (
     userId text PRIMARY KEY,
-    email text NOT NULL,
+    email text NOT NULL UNIQUE,
     password text NOT NULL,
     firstName text NOT NULL,
     lastName text NOT NULL,
     profilePhoto bytea,
     isLotOwner boolean NOT NULL
+);
+
+CREATE TABLE sessions (
+    token text PRIMARY KEY,
+    userId text NOT NULL,
+    expires timestamp
 );
 
 CREATE TABLE vehicles (
