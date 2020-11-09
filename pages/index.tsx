@@ -11,6 +11,7 @@ export default function App() {
     <ul>
       <ListLink target="blah" />
       <ListLink target="login" />
+      <ListLink target="searchLots"/>
     </ul>
   </div>;
 }
