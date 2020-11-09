@@ -6,6 +6,7 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import { Paper, Box, TextField, Typography, Grid } from '@material-ui/core';
+import { shadows } from '@material-ui/system';
 import styles from './searchLots.module.scss';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import Button from '@material-ui/core/Button';
@@ -52,9 +53,10 @@ export default function Search(this: any) {
     <div>
       <List className={styles.searchResult}>
         {renderEntries(
+          <Box className={styles.searchBox} boxShadow={3}>
           <ListItem>
             <ListItemText
-              primary={"Lot"}
+              primary={"Generated Sample Parking Lot"}
               secondary={secondary ? 'Secondary text' : null}
             />
             <ListItemSecondaryAction>
@@ -63,6 +65,7 @@ export default function Search(this: any) {
               </Button>
             </ListItemSecondaryAction>
           </ListItem>,
+          </Box>
         )}
       </List>
     </div>

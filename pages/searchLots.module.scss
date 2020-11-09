@@ -6,11 +6,15 @@
     padding: 30px;
 }
 
-.searchResult {
+.searchBox {
     margin: auto;
     width: 500px;
     height: auto;
-    margin-top: 50px;
-    padding: 30px;
-    justify: center;
+    margin-top: 20px;
+    padding: 20px;
+    box-shadow: 3;
+}
+
+.searchResult {
+    margin: auto;
 }
