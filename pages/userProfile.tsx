@@ -49,7 +49,7 @@ export default function profile() {
   return <React.Fragment>
     <Head>
       <title>User Profile</title>
-    </Head>;
+    </Head>
     <AppMenu page="User Profile" />
     <Paper className={styles.profileBox} elevation = {3}>
       <Grid>
