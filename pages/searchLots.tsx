@@ -56,7 +56,7 @@ export default function Search(this: any) {
             <ListItem>
               <ListItemText
                 primary={'Generated Sample Parking Lot'}
-                secondary={secondary ? 'Secondary text' : null}
+                secondary={'Sample Address'}
               />
               <ListItemSecondaryAction>
                 <Link href="/lotProfile" passHref>
