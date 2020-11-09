@@ -19,7 +19,7 @@ export default function Search(this: any) {
     filter: ""});
 
 
-    const getEntries = () => {
+    /*const getEntries = () => {
       return new Promise(function(resolve, reject) {
         pool.query('SELECT * FROM lot ORDER BY id ASC', (error, results) => {
           if (error) {
@@ -28,11 +28,15 @@ export default function Search(this: any) {
           resolve(results.rows);
         })
       }) 
-    }
+    }*/
 
   function renderEntries(element: JSX.Element) {
-    let vals = getEntries;
-    return vals;
+    //let vals = getEntries;
+    return [0, 1, 2, 3, 4, 5].map((value) =>
+      React.cloneElement(element, {
+        key: value,
+      }),
+    );
   }
 
   const onchange = (e: any) => {
@@ -44,7 +48,7 @@ export default function Search(this: any) {
       <title>Search for lots</title>
     </Head>
     <AppMenu page="Search" />
-    <SearchBar className={styles.searchBar} onChange = {onchange}/>
+    <SearchBar className={styles.searchBar} />
     <div>
       <List className={styles.searchResult}>
         {renderEntries(
