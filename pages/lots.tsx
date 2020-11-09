@@ -39,6 +39,7 @@ export default function Lots() {
   let [size, setSize] = React.useState('');
 
   const handleAddLot = (name: string, location: string, size: number) => {
+    // @ts-ignore
     setLots([...lots, LotCard({ name: name, location: location, size: size, capacity: 0 })]);
     handleClose();
   };

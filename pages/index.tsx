@@ -10,9 +10,10 @@ export default function App() {
     </Head>
     <h2>Index of random stuff</h2>
     <h4>Temporary placeholder for homepage</h4>
+    Current account information:
     <UserInfo />
+    Pages:
     <ul>
-      <ListLink target="blah" />
       <ListLink target="login" />
       <ListLink target="searchLots"/>
       <ListLink target="lots" />
