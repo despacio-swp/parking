@@ -37,6 +37,7 @@ CREATE TABLE parkingLots (
 CREATE TABLE protests (
     protestId text PRIMARY KEY,
     userId text REFERENCES accounts (userId) NOT NULL,
+    protestDate text NOT NULL,
     protestName text NOT NULL,
     email text NOT NULL,
     protestAddress text NOT NULL, 
