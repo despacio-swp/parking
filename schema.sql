@@ -34,6 +34,17 @@ CREATE TABLE parkingLots (
     tags text[] NOT NULL
 );
 
+CREATE TABLE protests (
+    protestId text PRIMARY KEY,
+    userId text REFERENCES accounts (userId) NOT NULL,
+    protestName text NOT NULL,
+    email text NOT NULL,
+    protestAddress text NOT NULL, 
+    phoneNumber text,
+    protestDescription text,
+    protestPhoto bytea
+);
+
 CREATE TABLE lotOccupancy (
     plateId text REFERENCES vehicles (plateId) NOT NULL,
     lotId text REFERENCES parkingLots (lotId) NOT NULL
