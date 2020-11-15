@@ -12,6 +12,6 @@ router.get('/v1', wrap(async (req, res) => {
 
 router.use('/v1/counter', counterRouter);
 router.use('/v1/accounts', accountsRouter);
-router.use('/v1/parkingLots', lotsRouter)
+router.use('/v1/lots', lotsRouter)
 
 export default router;

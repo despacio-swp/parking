@@ -16,6 +16,8 @@ let ajv = new Ajv();
 router.use(jsonParse);
 router.use(cookieParse);
 
+router.get('/', (_req, res) => res.send({ status: 'ok' }));
+
 // TODO: use ajv more
 
 /**
@@ -70,7 +72,7 @@ Promise<{ userId: string, token: string} | null> {
   GET REQUEST
 */
 
-router.get('/lot/:lotId', wrapAsync(async (req, res) => {
+router.get('/:lotId', wrapAsync(async (req, res) => {
   let session = await validateSession(req, res);
   if (!session) return;
 
@@ -90,7 +92,7 @@ router.get('/lot/:lotId', wrapAsync(async (req, res) => {
   PUT REQUEST
 */
 // ask how to deal w parameters that could be null
-router.put('/lot/:lotId', wrapAsync(async (req, res) => {
+router.put('/:lotId', wrapAsync(async (req, res) => {
   let session = await validateSession(req, res);
   if (!session) return;
 
