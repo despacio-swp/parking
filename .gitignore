@@ -65,3 +65,6 @@ typings/
 
 # next static export output
 /out
+
+# history
+/.history
