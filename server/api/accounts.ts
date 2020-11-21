@@ -22,22 +22,26 @@ router.get('/', (_req, res) => res.send({ status: 'ok' }));
 
 // TODO: use ajv more
 
-/**
- * Validate a session
- * @param req
- * @param res
- */
-async function validateSession(req: express.Request, res: express.Response):
-Promise<{ userId: string, token: string} | null> {
+declare module 'express-serve-static-core' {
+  interface Request {
+    // add "session" property to express.Request
+    session: any;
+  }
+}
+
+/** Session validation middleware */
+export async function validateSession(req: express.Request, res: express.Response, next: express.NextFunction) {
   let sessionToken: string | undefined = req.cookies.session;
   if (!sessionToken) {
-    log.verbose('authenticated endpoint called without session');
+    /*
     res.status(401).send({
       status: 'error',
       error: 'NO_SESSION',
       description: 'no session exists'
     });
-    return null;
+    */
+    req.session = null;
+    return next();
   }
 
   let session = (await db.query(
@@ -45,39 +49,50 @@ Promise<{ userId: string, token: string} | null> {
     [sessionToken]
   )).rows[0];
   if (!session) {
-    log.verbose('session not found');
+    log.debug('session not found');
+    /*
     res.status(401).send({
       status: 'error',
       error: 'INVALID_SESSION',
       description: 'provided session does not exist'
     });
-    return null;
+    */
+    req.session = null;
+    return next();
   }
   if (session.expires && +session.expires < Date.now()) {
-    log.verbose('session expired');
+    log.debug('session expired');
+    /*
     res.status(401).send({
       status: 'error',
       error: 'INVALID_SESSION',
       description: 'provided session does not exist'
     });
+    */
     await db.query('DELETE FROM sessions WHERE token = $1', [sessionToken]);
-    return null;
+    req.session = null;
+    return next();
   }
 
-  return {
+  req.session = {
     userId: session.userid,
     token: sessionToken
   };
+  return next();
 }
 
-router.get('/session', wrapAsync(async (req, res) => {
-  let session = await validateSession(req, res);
-  if (!session) return;
-
-  let user = (await db.query('SELECT firstname, lastname, email FROM accounts WHERE userid = $1', [session.userId])).rows[0];
+router.get('/session', validateSession, wrapAsync(async (req, res) => {
+  if (!req.session) {
+    res.status(404).send({
+      status: 'error',
+      error: 'NO_SESSION',
+      description: 'session does not exist'
+    });
+  }
+  let user = (await db.query('SELECT firstname, lastname, email FROM accounts WHERE userid = $1', [req.session.userId])).rows[0];
   res.status(200).send({
     status: 'ok',
-    userId: session.userId,
+    userId: req.session.userId,
     firstName: user.firstname,
     lastName: user.lastname,
     email: user.email
@@ -160,7 +175,7 @@ router.post('/login', jsonParse, wrapAsync(async (req, res) => {
 router.post('/logout', wrapAsync(async (req, res) => {
   let sessionToken: string | undefined = req.cookies.session;
   if (!sessionToken) {
-    log.verbose('logout called without session');
+    log.debug('logout called without session');
     return res.status(400).send({
       status: 'error',
       error: 'NO_SESSION',
@@ -169,11 +184,11 @@ router.post('/logout', wrapAsync(async (req, res) => {
   }
   let result = await db.query('DELETE FROM sessions WHERE token = $1', [sessionToken]);
   if (result.rowCount > 0) {
-    log.verbose('logout successful');
+    log.debug('logout successful');
     res.cookie('session', '');
     res.status(200).send({ status: 'ok' });
   } else {
-    log.verbose('logout called with invalid session');
+    log.debug('logout called with invalid session');
     res.status(404).send({
       status: 'error',
       error: 'INVALID_SESSION',
