@@ -124,13 +124,12 @@ router.put('/:lotId', wrapAsync(async (req, res) => {
 let registerSchema = ajv.compile({
   type: 'object',
   properties: {
-    userId: {type: 'string'},
     capacity: { type: 'integer' },
     lotAddress: { type: 'string' },
     pricePerHour: {type: 'number'},
     lotDescription: {type: 'string'}
   },
-  required: ['userId','capacity', 'lotAddress', 'pricePerHour']
+  required: ['capacity', 'lotAddress', 'pricePerHour']
 });
 
 /*
@@ -145,16 +144,19 @@ router.post('/lot', wrapAsync(async (req, res) => {
     });
     return;
   }
+  
 
   let lotId = generateUuid();
 
   let lotDescription = req.body.lotDescription;
   let tags = req.body.tags;
 
-  let { userId, capacity, lotAddress, pricePerHour} = req.body;
+  let { capacity, lotAddress, pricePerHour} = req.body;
+  
   // TODO: do a select here first to avoid expensive hash if account already exists
-  let result = await db.query('INSERT INTO parkingLots (lotId, userId, capacity, lotAddress, pricePerHour, lotDescription, tags) ' +
-    'VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT DO NOTHING', [lotId, userId, capacity, lotAddress, pricePerHour, lotDescription, tags]);
+  let result = await db.query('INSERT INTO parkingLots (lotId, userId, capacity, lotAddress, pricePerHour, lotDescription) ' +
+    'VALUES ($1,\'a1ba09ca-ea36-4d6d-9f90-fe370d1970d9\', $2, $3, $4, $5) ON CONFLICT DO NOTHING', [lotId, capacity, lotAddress, pricePerHour, lotDescription]);
+  
   if (!result.rowCount) {
     res.status(409).send({
       status: 'error',
@@ -165,7 +167,6 @@ router.post('/lot', wrapAsync(async (req, res) => {
     res.status(200).send({
       status: 'ok',
       lotId: lotId,
-      userId: userId,
       lotAddress: lotAddress,
       pricePerHour: pricePerHour,
       lotDescription: lotDescription,
