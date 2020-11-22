@@ -1,7 +1,7 @@
 import React from 'react';
 import AppMenu from '../components/AppMenu';
-import {Grid, Menu, MenuItem, TextField, Button, IconButton, Fab} from '@material-ui/core';
-import {Card, CardHeader, CardContent, CardActions, Collapse} from '@material-ui/core';
+import {Grid, Menu, MenuItem, TextField, Button, IconButton, Fab, Typography} from '@material-ui/core';
+import {Card, CardHeader, CardContent, CardActions, Collapse, List, ListItem, ListItemText} from '@material-ui/core';
 import {Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions} from '@material-ui/core';
 import {MoreVert, ExpandMore, Add} from '@material-ui/icons';
 import styles from './lots.module.scss';
@@ -14,7 +14,13 @@ interface Lot {
     price: number;
 }
 
+interface Customer {
+    name: string;
+    license: string;
+}
+
 function LotCard(props: any) {
+    const [customers, setCustomers] = React.useState<Customer[]>([]);
     const [expanded, setExpanded] = React.useState(false);
     const [anchorEl, setAnchorEl] = React.useState(null);
 
@@ -60,7 +66,13 @@ function LotCard(props: any) {
                 </CardActions>
                 <Collapse in={expanded} timeout="auto" unmountOnExit>
                     <CardContent>
-                        empty
+                        <List>
+                            {customers.map(customer => {
+                                <ListItem dense>
+                                    <ListItemText primary={customer.name} secondary={customer.license} />
+                                </ListItem>
+                            })}
+                        </List>
                     </CardContent>
                 </Collapse>
             </Card>
@@ -135,7 +147,7 @@ export default function LotPage() {
             <AppMenu page="Lots"/>
             <Grid container direction="column" alignItems="center">
                 {lots.map(lot =>
-                <React.Fragment>
+                <React.Fragment key={lot.name}>
                     <LotCard lot={lot}
                         openEdit={() => handleOpenEditDialog(lot)}
                         onEdit={() => handleEdit(lot)}
