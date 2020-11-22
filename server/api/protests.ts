@@ -72,20 +72,21 @@ Promise<{ userId: string, token: string} | null> {
   GET REQUEST
 */
 
-router.get('/:lotId', wrapAsync(async (req, res) => {
+router.get('/:protestId', wrapAsync(async (req, res) => {
   let session = await validateSession(req, res);
   if (!session) return;
 
-  let lotId = req.params.lotId;
+  let protestId = req.params.protestId;
 
-  let lot = (await db.query('SELECT userId, capacity, lotAddress, pricePerHour, lotDescription FROM parkingLots WHERE lotId = $1', [lotId])).rows[0];
+  let lot = (await db.query('SELECT userId, protestDate, protestName, email, protestAddress, protestDescription FROM protests WHERE protestId = $1', [protestId])).rows[0];
   res.status(200).send({
     status: 'ok',
     userId: lot.userId,
-    capacity: lot.capacity,
-    lotAddress: lot.lotAddress,
-    pricePerHour: lot.pricePerHour,
-    lotDescription: lot.lotDescription
+    protestDate: lot.protestDate,
+    protestName: lot.protestName,
+    email: lot.email,
+    protestAddress: lot.protestAddress,
+    protestDescription: lot.protestDescription
   });
 }));
 
@@ -93,31 +94,31 @@ router.get('/:lotId', wrapAsync(async (req, res) => {
   PUT REQUEST
 */
 // ask how to deal w parameters that could be null
-router.put('/:lotId', wrapAsync(async (req, res) => {
+router.put('/:protestId', wrapAsync(async (req, res) => {
   let session = await validateSession(req, res);
   if (!session) return;
 
-  let lotId = req.params.lotId;
+  let protestId = req.params.protestId;
   let userId = req.params.userId;
-  let capacity = req.params.capacity;
-  let lotAddress = req.params.lotAddress;
-  let pricePerHour = req.params.pricePerHour;
+  let protestDate = req.params.protestDate;
+  let protestName = req.params.protestName;
+  let email = req.params.email;
+  let protestAddress = req.params.protestAddress;
   // possible null parameters
-  let lotDescription = req.params.lotDescription;
-  let tags = req.params.tags;
+  let protestDescription = req.params.protestDescription;
 
-  let lot = (await db.query('UPDATE parkingLots SET userId = $2, capacity = $3, lotAddress = $4, pricePerHour = $5, lotDescription = $6, tags = $7 WHERE lotId = $1 ' +
-    'ON CONFLICT DO NOTHING', [lotId,userId,capacity,lotAddress,pricePerHour,lotDescription,tags]));
+  let lot = (await db.query('UPDATE protests SET userId = $2, protestDate = $3, protestName = $4, email = $5, protestAddress = $6, protestDescription = $7 WHERE protestId = $1 ' +
+    'ON CONFLICT DO NOTHING', [protestId,userId,protestDate,protestName,email, protestAddress,protestDescription]));
   
     res.status(200).send({
     status: 'ok',
-    lotId: lotId,
+    protestId: protestId,
     userId: userId,
-    capacity: capacity,
-    lotAddress: lotAddress,
-    pricePerHour: pricePerHour,
-    lotDescription: lotDescription,
-    tags: tags
+    protestDate: protestDate,
+    protestName: protestName,
+    email: email,
+    protestAddress: protestAddress,
+    protestDescription: protestDescription
   });
 }));
 
@@ -125,18 +126,17 @@ let registerSchema = ajv.compile({
   type: 'object',
   properties: {
     userId: {type: 'string'},
-    capacity: { type: 'integer' },
-    lotAddress: { type: 'string' },
-    pricePerHour: {type: 'number'},
-    lotDescription: {type: 'string'}
+    protestDate: { type: 'string' },
+    protestAddress: { type: 'string' },
+    protestDescription: {type: 'string'}
   },
-  required: ['userId','capacity', 'lotAddress', 'pricePerHour']
+  required: ['userId','protestDate', 'protestAddress']
 });
 
 /*
   POST REQUEST
 */
-router.post('/lot', wrapAsync(async (req, res) => {
+router.post('/protest', wrapAsync(async (req, res) => {
   if (!registerSchema(req.body)) {
     res.status(400).send({
       status: 'error',
@@ -146,30 +146,31 @@ router.post('/lot', wrapAsync(async (req, res) => {
     return;
   }
 
-  let lotId = generateUuid();
+  let protestId = generateUuid();
 
-  let lotDescription = req.body.lotDescription;
-  let tags = req.body.tags;
+  let userId = req.body.userId;
+  
 
-  let { userId, capacity, lotAddress, pricePerHour} = req.body;
-  // TODO: do a select here first to avoid expensive hash if account already exists
-  let result = await db.query('INSERT INTO parkingLots (lotId, userId, capacity, lotAddress, pricePerHour, lotDescription, tags) ' +
-    'VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT DO NOTHING', [lotId, userId, capacity, lotAddress, pricePerHour, lotDescription, tags]);
+  let {protestDate, protestName, email, protestAddress, protestDescription} = req.body;
+  
+  let result = await db.query('INSERT INTO protests (protestId, userId, protestDate, protestAddress, protestDescription, tags) ' +
+    'VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT DO NOTHING', [protestId, userId, protestDate, protestName, email, protestAddress, protestDescription]);
   if (!result.rowCount) {
     res.status(409).send({
       status: 'error',
-      error: 'LOT_EXISTS',
-      description: 'lot with the provided lotAddress already exists'
+      error: 'PROTEST_EXISTS',
+      description: 'protest with the provided protestAddress already exists'
     });
   } else {
     res.status(200).send({
       status: 'ok',
-      lotId: lotId,
+      protestId: protestId,
       userId: userId,
-      lotAddress: lotAddress,
-      pricePerHour: pricePerHour,
-      lotDescription: lotDescription,
-      tags: tags
+      protestDate: protestDate,
+      protestName: protestName,
+      email: email,
+      protestAddress: protestAddress,
+      protestDescription: protestDescription
     });
   }
 }));

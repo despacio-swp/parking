@@ -1,6 +1,11 @@
-.lotCard {
-    width: 500px;
-    margin-top: 10px;
+.card {
+    width: 480px;
+    margin: 10px;
+}
+
+.expand {
+    transform: rotate(0deg);
+    margin-left: auto;
 }
 
 .fab {

@@ -16,10 +16,11 @@ export default function App() {
     <ul>
       <ListLink target="login" />
       <ListLink target="searchLots"/>
-      <ListLink target="lots" />
       <ListLink target="lotProfile" />
       <ListLink target="register" />
       <ListLink target="userProfile" />
+      <ListLink target="lots" />
+      <ListLink target="protests" />
     </ul>
   </div>;
 }
