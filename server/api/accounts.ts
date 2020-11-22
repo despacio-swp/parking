@@ -88,6 +88,7 @@ router.get('/session', validateSession, wrapAsync(async (req, res) => {
       error: 'NO_SESSION',
       description: 'session does not exist'
     });
+    return;
   }
   let user = (await db.query('SELECT firstname, lastname, email FROM accounts WHERE userid = $1', [req.session.userId])).rows[0];
   res.status(200).send({
@@ -99,7 +100,7 @@ router.get('/session', validateSession, wrapAsync(async (req, res) => {
   });
 }));
 
-router.post('/login', jsonParse, wrapAsync(async (req, res) => {
+router.post('/login', wrapAsync(async (req, res) => {
   if (!req.body.email || !req.body.password) {
     log.verbose('login request failed (bad request)');
     return res.status(400).send({
