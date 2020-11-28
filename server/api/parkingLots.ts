@@ -37,6 +37,21 @@ router.get('/:lotId', wrapAsync(async (req, res) => {
   });
 }));
 
+
+/*
+  GET REQUEST for All Lots
+*/
+router.get('/:lots', wrapAsync(async (req, res) => {
+  let lotId = req.params.lotId;
+
+  let lots = await db.query('SELECT userId, capacity, lotAddress, pricePerHour, lotDescription FROM parkingLots');
+  
+  //trying to send all lots at once
+  res.status(200).send({
+    lots: lots.rows
+  });
+}));
+
 /*
   PUT REQUEST
 */
