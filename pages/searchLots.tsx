@@ -32,7 +32,7 @@ export default function Search(this: any) {
   async function getEntries() {
     let response;
     try {
-      response = await axios.post('/api/v1/parkingLots/lot', {
+      response = await axios.get('/api/v1/parkingLots/lot', {
         userId, capacity, lotAddress, lotDescription
       });
     }
@@ -45,7 +45,7 @@ export default function Search(this: any) {
 
 
   function renderEntries(element: JSX.Element) {
-    // let vals = getEntries;
+    console.log('Loading entries');
     let elements = [0, 1, 2, 3, 4, 5].map(value => {
       React.cloneElement(element, {
         key: value,
@@ -53,7 +53,7 @@ export default function Search(this: any) {
       })
     },
     );
-    getEntries();
+    let vals = getEntries();
     return elements;
   }
 
@@ -90,6 +90,7 @@ export default function Search(this: any) {
           <FormControlLabel value="address" color="primary" control={<Radio />} label="Address" />
           <FormControlLabel value="capacity" color="primary" control={<Radio />} label="Capacity" />
           <FormControlLabel value="protest" color="primary" control={<Radio />} label="Protest" />
+          <FormControlLabel value="tags" color="primary" control={<Radio />} label="Tags" />
         </RadioGroup>
       </FormControl>
     </div>
