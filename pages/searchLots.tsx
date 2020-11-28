@@ -19,10 +19,10 @@ export default function Search(this: any) {
   const [secondary, setSecondary] = React.useState(false);
   const [query, setQuery] = React.useState({ query: '' });
 
-  const [userId, setUserId] = React.useState({ address: '' });
+  const [lotId, setLotId] = React.useState({ lotId: '' });
   const [capacity, setCapacity] = React.useState({ capacity: 0 });
   const [lotAddress, setLotAddress] = React.useState({ address: '' });
-  const [lotDescription, setLotDescription] = React.useState({ address: '' });
+  const [lotDescription, setLotDescription] = React.useState({ description: '' });
   const [value, setValue] = React.useState('name');
   let [requestError, setRequestError] = React.useState<string | null>(null);
   let [requestSuccess, setRequestSuccess] = React.useState(false);
@@ -32,15 +32,15 @@ export default function Search(this: any) {
   async function getEntries() {
     let response;
     try {
-      response = await axios.get('/api/v1/parkingLots/lot', {
-        userId, capacity, lotAddress, lotDescription
-      });
+      response = await axios.get('/api/v1/lots/');
     }
     catch (err) {
       if (err.response) response = err.response;
       else throw err;
     }
-    console.log(response);
+    if(response.data !== null) {
+      console.log('Error!');
+    }
   }
 
 
@@ -54,6 +54,7 @@ export default function Search(this: any) {
     },
     );
     let vals = getEntries();
+    console.log(vals);
     return elements;
   }
 
