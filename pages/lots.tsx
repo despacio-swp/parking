@@ -1,4 +1,5 @@
 import React from 'react';
+import axios from 'axios';``
 import AppMenu from '../components/AppMenu';
 import {Grid, Menu, MenuItem, TextField, Button, IconButton, Fab} from '@material-ui/core';
 import {Card, CardHeader, CardContent, CardActions, Collapse} from '@material-ui/core';
@@ -7,10 +8,9 @@ import {MoreVert, ExpandMore, Add} from '@material-ui/icons';
 import styles from './lots.module.scss';
 
 interface Lot {
-    name: string;
-    location: string;
-    size: number;
+    userId: string;
     capacity: number;
+    location: string;
     price: number;
 }
 
@@ -86,25 +86,30 @@ export default function LotPage() {
     };
 
     const handleOpenEditDialog = (lot: Lot) => {
-        setName(lot.name);
+        //setName(lot.name);
         setLocation(lot.location);
-        setSize(lot.size.toString());
+        //setSize(lot.size.toString());
         setPrice(lot.price.toString());
         setOpenEditDialog(true);
     };
 
     const handleEdit = (lot: Lot) => {
-        lot.name = name;
+        //lot.name = name;
         lot.location = location;
-        lot.size = +size;
+        //lot.size = +size;
         lot.price = +price
         setOpenEditDialog(false);
     };
 
-    const handleAdd = (name: string, location: string, size: number, price: number) => {
-        const lot: Lot = {name, location, size, capacity: 0, price};
+    const handleAdd = (userId:string,location: string, size: number, price: number) => {
+        const lot: Lot = {userId: "37373", capacity: 0, location, price};
         setLots([...lots, lot]);
         setOpenAddDialog(false);
+        post();
+    };
+
+    async function post() {
+        await axios.post('/api/v1/lots/lot', {capacity: 0, lotAddress:"miami", pricePerHour:2, lotDescription:"hello"})
     };
 
     const handleDelete = (lot: Lot) => {
@@ -149,7 +154,7 @@ export default function LotPage() {
                                 onChange={event => setName(event.target.value)} 
                                 error={error("name")}
                                 helperText={errorText("name")}
-                                placeholder={lot.name}
+                                //placeholder={lot.name}
                             />
                             <TextField value={location} label="Location" margin="normal" fullWidth 
                                 onChange={event => setLocation(event.target.value)} 
@@ -165,7 +170,7 @@ export default function LotPage() {
                                 }}
                                 error={error("size")}
                                 helperText={errorText("size")}
-                                placeholder={lot.size.toString()}
+                                //placeholder={lot.size.toString()}
                             />
                             <TextField value={price} label="Price (per hour)" margin="normal" fullWidth 
                                 onChange={event =>  {
@@ -223,7 +228,8 @@ export default function LotPage() {
                 </DialogContent>
                 <DialogActions>
                     <Button color="primary" onClick={() => setOpenAddDialog(false)}> Cancel </Button>
-                    <Button disabled={error("")} color="primary" onClick={() => handleAdd(name, location, +size, +price)}> Create </Button>
+                    <Button disabled={error("")} color="primary" onClick={() => handleAdd(name, location, +size, +price)
+                                                                           }> Create </Button>
                 </DialogActions>
             </Dialog>
         </React.Fragment>

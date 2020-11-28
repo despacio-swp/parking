@@ -4,8 +4,8 @@ import cookieParser from 'cookie-parser';
 import Ajv from 'ajv';
 import { v4 as generateUuid } from 'uuid';
 import db from '../db';
-import log from '../logger';
-import { wrapAsync} from '../common';
+import { wrapAsync } from '../common';
+import { validateSession } from './accounts';
 
 
 let router = express.Router(); // eslint-disable-line new-cap
@@ -20,62 +20,10 @@ router.get('/', (_req, res) => res.send({ status: 'ok' }));
 
 // TODO: use ajv more
 
-/**
- * Validate a session
- * @param req
- * @param res
- */
-async function validateSession(req: express.Request, res: express.Response):
-Promise<{ userId: string, token: string} | null> {
-  let sessionToken: string | undefined = req.cookies.session;
-  if (!sessionToken) {
-    log.verbose('authenticated endpoint called without session');
-    res.status(401).send({
-      status: 'error',
-      error: 'NO_SESSION',
-      description: 'no session exists'
-    });
-    return null;
-  }
-
-  let session = (await db.query(
-    'SELECT userId, expires FROM sessions WHERE token = $1',
-    [sessionToken]
-  )).rows[0];
-  if (!session) {
-    log.verbose('session not found');
-    res.status(401).send({
-      status: 'error',
-      error: 'INVALID_SESSION',
-      description: 'provided session does not exist'
-    });
-    return null;
-  }
-  if (session.expires && +session.expires < Date.now()) {
-    log.verbose('session expired');
-    res.status(401).send({
-      status: 'error',
-      error: 'INVALID_SESSION',
-      description: 'provided session does not exist'
-    });
-    await db.query('DELETE FROM sessions WHERE token = $1', [sessionToken]);
-    return null;
-  }
-
-  return {
-    userId: session.userId,
-    token: sessionToken
-  };
-}
-
 /*
   GET REQUEST
 */
-
 router.get('/:lotId', wrapAsync(async (req, res) => {
-  let session = await validateSession(req, res);
-  if (!session) return;
-
   let lotId = req.params.lotId;
 
   let lot = (await db.query('SELECT userId, capacity, lotAddress, pricePerHour, lotDescription FROM parkingLots WHERE lotId = $1', [lotId])).rows[0];
@@ -89,14 +37,26 @@ router.get('/:lotId', wrapAsync(async (req, res) => {
   });
 }));
 
+
+/*
+  GET REQUEST for All Lots
+*/
+router.get('/:lots', wrapAsync(async (req, res) => {
+  let lotId = req.params.lotId;
+
+  let lots = await db.query('SELECT userId, capacity, lotAddress, pricePerHour, lotDescription FROM parkingLots');
+  
+  //trying to send all lots at once
+  res.status(200).send({
+    lots: lots.rows
+  });
+}));
+
 /*
   PUT REQUEST
 */
 // ask how to deal w parameters that could be null
 router.put('/:lotId', wrapAsync(async (req, res) => {
-  let session = await validateSession(req, res);
-  if (!session) return;
-
   let lotId = req.params.lotId;
   let userId = req.params.userId;
   let capacity = req.params.capacity;
@@ -107,9 +67,9 @@ router.put('/:lotId', wrapAsync(async (req, res) => {
   let tags = req.params.tags;
 
   let lot = (await db.query('UPDATE parkingLots SET userId = $2, capacity = $3, lotAddress = $4, pricePerHour = $5, lotDescription = $6, tags = $7 WHERE lotId = $1 ' +
-    'ON CONFLICT DO NOTHING', [lotId,userId,capacity,lotAddress,pricePerHour,lotDescription,tags]));
+    'ON CONFLICT DO NOTHING', [lotId, userId, capacity, lotAddress, pricePerHour, lotDescription, tags]));
   
-    res.status(200).send({
+  res.status(200).send({
     status: 'ok',
     lotId: lotId,
     userId: userId,
@@ -121,27 +81,35 @@ router.put('/:lotId', wrapAsync(async (req, res) => {
   });
 }));
 
-let registerSchema = ajv.compile({
+let createLotSchema = ajv.compile({
   type: 'object',
   properties: {
-    userId: {type: 'string'},
     capacity: { type: 'integer' },
     lotAddress: { type: 'string' },
-    pricePerHour: {type: 'number'},
-    lotDescription: {type: 'string'}
+    pricePerHour: { type: 'number' },
+    lotDescription: { type: 'string' },
+    tags: { type: 'array', items: { type: 'string' } }
   },
-  required: ['userId','capacity', 'lotAddress', 'pricePerHour']
+  required: ['capacity', 'lotAddress', 'pricePerHour']
 });
 
 /*
   POST REQUEST
 */
-router.post('/lot', wrapAsync(async (req, res) => {
-  if (!registerSchema(req.body)) {
+router.post('/lot', validateSession, wrapAsync(async (req, res) => {
+  if (!req.session) {
+    res.status(401).send({
+      status: 'error',
+      error: 'NOT_AUTHENTICATED',
+      details: 'no session exists'
+    });
+    return;
+  }
+  if (!createLotSchema(req.body)) {
     res.status(400).send({
       status: 'error',
       error: 'VALIDATION_FAILED',
-      details: registerSchema.errors
+      details: createLotSchema.errors
     });
     return;
   }
@@ -150,8 +118,10 @@ router.post('/lot', wrapAsync(async (req, res) => {
 
   let lotDescription = req.body.lotDescription;
   let tags = req.body.tags;
+  if (!tags) tags = [];
+  let userId = req.session.userId;
 
-  let { userId, capacity, lotAddress, pricePerHour} = req.body;
+  let { capacity, lotAddress, pricePerHour } = req.body;
   // TODO: do a select here first to avoid expensive hash if account already exists
   let result = await db.query('INSERT INTO parkingLots (lotId, userId, capacity, lotAddress, pricePerHour, lotDescription, tags) ' +
     'VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT DO NOTHING', [lotId, userId, capacity, lotAddress, pricePerHour, lotDescription, tags]);
