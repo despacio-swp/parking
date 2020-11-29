@@ -16,7 +16,7 @@ router.use(jsonParse);
 router.use(cookieParse);
 
 router.get('/:userId', wrapAsync(async (req, res) => {
-  let userQuery = await db.query('SELECT userId, firstName, lastName FROM accounts WHERE userId = $1', [req.params.userId]);
+  let userQuery = await db.query('SELECT userId, firstName, lastName, email FROM accounts WHERE userId = $1', [req.params.userId]);
   if (!userQuery.rows.length) {
     res.status(404).send({
       status: 'error',
@@ -32,6 +32,7 @@ router.get('/:userId', wrapAsync(async (req, res) => {
     userId: user.userid,
     firstName: user.firstname,
     lastName: user.lastname,
+    email: user.email,
     vehicles
   });
 }));
@@ -69,6 +70,9 @@ router.post('/self', validateSession, wrapAsync(async (req, res) => {
     'UPDATE accounts SET firstName = $2, lastName = $3, email = $4 WHERE userId = $1',
     [userId, firstName, lastName, email]
   );
+  res.send({
+    status: 'ok',
+    firstName, lastName, email
+  });
 }));
-
 export default router;

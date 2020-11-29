@@ -28,6 +28,8 @@ export default function profile() {
   let [found, setFound] = React.useState(true);
   let [firstName, setFirstName] = React.useState('');
   let [lastName, setLastName] = React.useState('');
+  let [email, setEmail] = React.useState('');
+  let [updateLoading, setUpdateLoading] = React.useState(false);
   // let [plate, setPlate] = React.useState('');
 
   useEffect(() => {
@@ -46,26 +48,35 @@ export default function profile() {
       console.log(response.data);
       setFirstName(response.data.firstName);
       setLastName(response.data.lastName);
+      setEmail(response.data.email);
       setLoading(false);
     })();
   }, [userId]);
 
   let [firstNameTemp, setFirstNameTemp] = React.useState('');
   let [lastNameTemp, setLastNameTemp] = React.useState('');
+  let [emailTemp, setEmailTemp] = React.useState('');
   // let [plateTemp, setPlateTemp] = React.useState('');
 
-  const changeProfile =
-  (firstNameTemp: string, lastNameTemp: string) => {
-    setFirstName(firstNameTemp);
-    setLastName(lastNameTemp);
-    // setPlate(plateTemp);
+  const changeProfile = async (firstNameTemp: string, lastNameTemp: string, emailTemp: string) => {
+    setUpdateLoading(true); // add new state for loading spinner on submit or something
+    let response = await axios.post('/api/v1/profiles/self', {
+      firstNameTemp,
+      lastNameTemp,
+      emailTemp
+    });
+      // also TODO: error handling, but that can happen later
+      // you want to use firstName, lastName, and email from the response in case server modified them, for example to remove profanity
+    setFirstName(response.data.firstName);
+    setLastName(response.data.lastName);
+    setEmail(response.data.email);
+    // we are done loading
+    setUpdateLoading(false);
     setOpen(false);
   };
 
   const handleClose = () => {
     setOpen(false);
-    setFirstName('');
-    setLastName('');
   };
 
   const classes = useStyle();
@@ -89,6 +100,7 @@ export default function profile() {
         </Grid>
         <Grid>
           <Typography variant="h6" align="left">User Name: {firstName} {lastName}</Typography>
+          <Typography variant="h6" align="left">Email: {email}</Typography>
           <Typography variant="h6" align="left">Car Information</Typography>
           {/*
           <Typography variant="h6" align="left">Make: {make} </Typography>
@@ -101,11 +113,12 @@ export default function profile() {
         <EditIcon />
       </Fab>
       <Dialog open={open} onClose={() => setOpen(false)}>
-        <DialogTitle> Create Lot </DialogTitle>
+        <DialogTitle> Edit Profile </DialogTitle>
         <DialogContent>
           <DialogContentText> Edit  This form to edit your Profile</DialogContentText>
           <TextField value={firstNameTemp} label="First Name" variant="outlined" margin="normal" fullWidth required onChange={event => setFirstNameTemp(event.target.value)}>{firstName}</TextField>
           <TextField value={lastNameTemp} label="Last Name" variant="outlined" margin="normal" fullWidth required onChange={event => setLastNameTemp(event.target.value)}>{lastName}</TextField>
+          <TextField value={emailTemp} label="Email" variant="outlined" margin="normal" fullWidth required onChange={event => setEmailTemp(event.target.value)}>{email}</TextField>
           {/*
           <TextField value={makeTemp} label="Make" variant="outlined" margin="normal" fullWidth required onChange={event => setMakeTemp(event.target.value)}>{make}</TextField>
           <TextField value={modelTemp} label="Model" variant="outlined" margin="normal" fullWidth required onChange={event => setModelTemp(event.target.value)}>{model}</TextField>
@@ -114,7 +127,7 @@ export default function profile() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => handleClose()}> Cancel </Button>
-          <Button onClick={() => changeProfile(firstNameTemp, lastNameTemp)}>
+          <Button onClick={() => changeProfile(firstNameTemp, lastNameTemp, emailTemp)}>
           Edit
           </Button>
         </DialogActions>
