@@ -61,9 +61,9 @@ export default function profile() {
   const changeProfile = async (firstNameTemp: string, lastNameTemp: string, emailTemp: string) => {
     setUpdateLoading(true); // add new state for loading spinner on submit or something
     let response = await axios.post('/api/v1/profiles/self', {
-      firstNameTemp,
-      lastNameTemp,
-      emailTemp
+      firstName: firstNameTemp,
+      lastName: lastNameTemp,
+      email: emailTemp
     });
       // also TODO: error handling, but that can happen later
       // you want to use firstName, lastName, and email from the response in case server modified them, for example to remove profanity
@@ -73,6 +73,7 @@ export default function profile() {
     // we are done loading
     setUpdateLoading(false);
     setOpen(false);
+    accountsService.checkLoginState();
   };
 
   const handleClose = () => {
