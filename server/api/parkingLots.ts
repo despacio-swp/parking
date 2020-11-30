@@ -21,12 +21,33 @@ router.get('/', (_req, res) => res.send({ status: 'ok' }));
 // TODO: use ajv more
 
 /*
+  GET REQUEST for All Lots
+*/
+router.get('/all', wrapAsync(async (req, res) => {
+  let lots = await db.query('SELECT userId, capacity, lotAddress, pricePerHour, lotDescription FROM parkingLots');
+  
+  //trying to send all lots at once
+  res.status(200).send({
+    lots: lots.rows
+  });
+}));
+
+/*
   GET REQUEST
 */
 router.get('/:lotId', wrapAsync(async (req, res) => {
   let lotId = req.params.lotId;
 
-  let lot = (await db.query('SELECT userId, capacity, lotAddress, pricePerHour, lotDescription FROM parkingLots WHERE lotId = $1', [lotId])).rows[0];
+  let query = (await db.query('SELECT userId, capacity, lotAddress, pricePerHour, lotDescription FROM parkingLots WHERE lotId = $1', [lotId]));
+  if (!query.rows.length) {
+    res.status(404).send({
+      status: 'error',
+      error: 'LOT_NOT_FOUND',
+      description: 'lot does not exist'
+    });
+    return;
+  }
+  let lot = query.rows[0];
   res.status(200).send({
     status: 'ok',
     userId: lot.userId,
@@ -34,21 +55,6 @@ router.get('/:lotId', wrapAsync(async (req, res) => {
     lotAddress: lot.lotAddress,
     pricePerHour: lot.pricePerHour,
     lotDescription: lot.lotDescription
-  });
-}));
-
-
-/*
-  GET REQUEST for All Lots
-*/
-router.get('/:lots', wrapAsync(async (req, res) => {
-  let lotId = req.params.lotId;
-
-  let lots = await db.query('SELECT userId, capacity, lotAddress, pricePerHour, lotDescription FROM parkingLots');
-  
-  //trying to send all lots at once
-  res.status(200).send({
-    lots: lots.rows
   });
 }));
 

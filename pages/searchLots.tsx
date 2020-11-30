@@ -32,15 +32,19 @@ export default function Search(this: any) {
   async function getEntries() {
     let response;
     try {
-      response = await axios.get('/api/v1/lots/');
+      console.log('getting');
+      response = await axios.get('/api/v1/lots/all');
     }
     catch (err) {
       if (err.response) response = err.response;
       else throw err;
     }
-    if(response.data !== null) {
+    if(response.data === null) {
       console.log('Error!');
+    } else {
+      console.log(response);
     }
+    return response;
   }
 
 
