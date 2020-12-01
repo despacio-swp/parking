@@ -4,8 +4,8 @@ import cookieParser from 'cookie-parser';
 import Ajv from 'ajv';
 import { v4 as generateUuid } from 'uuid';
 import db from '../db';
-import log from '../logger';
-import { wrapAsync} from '../common';
+import { wrapAsync } from '../common';
+import { validateSession } from './accounts';
 
 
 let router = express.Router(); // eslint-disable-line new-cap
@@ -20,73 +20,44 @@ router.get('/', (_req, res) => res.send({ status: 'ok' }));
 
 // TODO: use ajv more
 
-/**
- * Validate a session
- * @param req
- * @param res
- */
-async function validateSession(req: express.Request, res: express.Response):
-Promise<{ userId: string, token: string} | null> {
-  let sessionToken: string | undefined = req.cookies.session;
-  if (!sessionToken) {
-    log.verbose('authenticated endpoint called without session');
-    res.status(401).send({
-      status: 'error',
-      error: 'NO_SESSION',
-      description: 'no session exists'
-    });
-    return null;
-  }
+/*
+	  GET REQUEST for All Protests
+	*/
+	router.get('/all', wrapAsync(async (req, res) => {
+	  let protests = await db.query('SELECT protestId, protestDate, protestName, email, protestAddress, protestDescription FROM protests');
+	  
+	  //trying to send all protests at once
+	  res.status(200).send({
+	    protests: protests.rows
+	  });
+	}));
 
-  let session = (await db.query(
-    'SELECT userId, expires FROM sessions WHERE token = $1',
-    [sessionToken]
-  )).rows[0];
-  if (!session) {
-    log.verbose('session not found');
-    res.status(401).send({
-      status: 'error',
-      error: 'INVALID_SESSION',
-      description: 'provided session does not exist'
-    });
-    return null;
-  }
-  if (session.expires && +session.expires < Date.now()) {
-    log.verbose('session expired');
-    res.status(401).send({
-      status: 'error',
-      error: 'INVALID_SESSION',
-      description: 'provided session does not exist'
-    });
-    await db.query('DELETE FROM sessions WHERE token = $1', [sessionToken]);
-    return null;
-  }
-
-  return {
-    userId: session.userId,
-    token: sessionToken
-  };
-}
 
 /*
   GET REQUEST
 */
 
 router.get('/:protestId', wrapAsync(async (req, res) => {
-  let session = await validateSession(req, res);
-  if (!session) return;
-
   let protestId = req.params.protestId;
 
-  let lot = (await db.query('SELECT userId, protestDate, protestName, email, protestAddress, protestDescription FROM protests WHERE protestId = $1', [protestId])).rows[0];
+  let query = (await db.query('SELECT userId, protestDate, protestName, email, protestAddress, protestDescription FROM protests WHERE protestId = $1', [protestId]));
+  if (!query.rows.length) {
+    res.status(404).send({
+      status: 'error',
+      error: 'PROTEST_NOT_FOUND',
+      description: 'protest does not exist'
+    });
+    return;
+  }
+  let protest = query.rows[0];
   res.status(200).send({
     status: 'ok',
-    userId: lot.userId,
-    protestDate: lot.protestDate,
-    protestName: lot.protestName,
-    email: lot.email,
-    protestAddress: lot.protestAddress,
-    protestDescription: lot.protestDescription
+    userId: protest.userId,
+    protestDate: protest.protestDate,
+    protestName: protest.protestName,
+    email: protest.email,
+    protestAddress: protest.protestAddress,
+    protestDescription: protest.protestDescription
   });
 }));
 
@@ -94,9 +65,7 @@ router.get('/:protestId', wrapAsync(async (req, res) => {
   PUT REQUEST
 */
 // ask how to deal w parameters that could be null
-router.put('/:protestId', wrapAsync(async (req, res) => {
-  let session = await validateSession(req, res);
-  if (!session) return;
+router.put('/:protestId', wrapAsync(async (req, res) => {``  
 
   let protestId = req.params.protestId;
   let userId = req.params.userId;
@@ -107,7 +76,7 @@ router.put('/:protestId', wrapAsync(async (req, res) => {
   // possible null parameters
   let protestDescription = req.params.protestDescription;
 
-  let lot = (await db.query('UPDATE protests SET userId = $2, protestDate = $3, protestName = $4, email = $5, protestAddress = $6, protestDescription = $7 WHERE protestId = $1 ' +
+  let protest = (await db.query('UPDATE protests SET userId = $2, protestDate = $3, protestName = $4, email = $5, protestAddress = $6, protestDescription = $7 WHERE protestId = $1 ' +
     'ON CONFLICT DO NOTHING', [protestId,userId,protestDate,protestName,email, protestAddress,protestDescription]));
   
     res.status(200).send({
@@ -122,7 +91,7 @@ router.put('/:protestId', wrapAsync(async (req, res) => {
   });
 }));
 
-let registerSchema = ajv.compile({
+let createProtestSchema = ajv.compile({
   type: 'object',
   properties: {
     userId: {type: 'string'},
@@ -137,18 +106,26 @@ let registerSchema = ajv.compile({
   POST REQUEST
 */
 router.post('/protest', wrapAsync(async (req, res) => {
-  if (!registerSchema(req.body)) {
+  if (!req.session) {
+    res.status(401).send({
+      status: 'error',
+      error: 'NOT_AUTHENTICATED',
+      details: 'no session exists'
+    });
+    return;
+  }
+  if (!createProtestSchema(req.body)) {
     res.status(400).send({
       status: 'error',
       error: 'VALIDATION_FAILED',
-      details: registerSchema.errors
+      details: createProtestSchema.errors
     });
     return;
   }
 
   let protestId = generateUuid();
 
-  let userId = req.body.userId;
+  let userId = req.session.userId;
   
 
   let {protestDate, protestName, email, protestAddress, protestDescription} = req.body;

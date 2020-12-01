@@ -31,8 +31,7 @@ CREATE TABLE parkingLots (
     lotAddress text NOT NULL,
     pricePerHour integer NOT NULL,
     lotDescription text,
-    lotPhoto bytea,
-    tags text[] NOT NULL
+    lotPhoto bytea
 );
 
 CREATE TABLE protests (
@@ -46,6 +45,14 @@ CREATE TABLE protests (
     protestDescription text,
     protestPhoto bytea
 );
+
+CREATE TABLE links (
+    linkId text PRIMARY KEY,
+    protestId text REFERENCES protests (protestId) NOT NULL,
+    protestAddress text REFERENCES protests (protestAddress) NOT NULL,
+    lotId text REFERENCES parkingLots (lotId) NOT NULL,
+    lotAddress text REFERENCES parkignLots (lotAddress) NOT NULL
+)
 
 CREATE TABLE lotOccupancy (
     plateId text REFERENCES vehicles (plateId) NOT NULL,
