@@ -9,7 +9,7 @@ const AppMenu: React.FC<{ page: string }> = ({ page }) => (
   <AppBar position="static">
     <Toolbar>
       <Grid justify="space-between" container direction="row" alignItems="center">
-        <Grid item alignItems="center">
+        <Grid item>
           <Link href="/" passHref>
             <IconButton edge="start" color="inherit" style={{ marginRight: theme.spacing(2) }}>
               <Menu />

@@ -6,8 +6,10 @@ import { Paper, Box, TextField, Typography, Grid, makeStyles, Dialog, DialogTitl
 import styles from './userProfile.module.scss';
 import { Avatar, Fab } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
+import Add from '@material-ui/icons/Add';
 import { useRouter } from 'next/router';
 import accountsService from '../../client/accountsService';
+import { stringify } from 'querystring';
 
 /* eslint-disable max-len */
 
@@ -18,19 +20,22 @@ const useStyle = makeStyles(theme => ({
   }
 }));
 
+
 export default function profile() {
   let router = useRouter();
   let userId: string | null = router.query.userId as string;
   if (userId === 'self') userId = accountsService.userId;
 
   let [open, setOpen] = React.useState(false);
+  let [openAdd, setOpenAdd] = React.useState(false);
   let [loading, setLoading] = React.useState(true);
   let [found, setFound] = React.useState(true);
   let [firstName, setFirstName] = React.useState('');
   let [lastName, setLastName] = React.useState('');
   let [email, setEmail] = React.useState('');
   let [updateLoading, setUpdateLoading] = React.useState(false);
-  // let [plate, setPlate] = React.useState('');
+  let [plateName, setPlate] = React.useState('');
+  let [plates, setPlates] = React.useState<string[]>([]);
 
   useEffect(() => {
     if (userId === null) return;
@@ -49,6 +54,7 @@ export default function profile() {
       setFirstName(response.data.firstName);
       setLastName(response.data.lastName);
       setEmail(response.data.email);
+      setPlates(response.data.vehicles);
       setLoading(false);
     })();
   }, [userId]);
@@ -76,11 +82,44 @@ export default function profile() {
     accountsService.checkLoginState();
   };
 
+  let [addPlateLoading, setAddPlateLoading] = React.useState(false);
+
+  const addPlate = async (plateName: string) => {
+    setAddPlateLoading(true);
+    // TODO: handle errors
+    try {
+      await axios.put('/api/v1/profiles/self/vehicles/' + plateName);
+    } catch (err) {
+      setAddPlateLoading(false);
+      return;
+    }
+    // this should be correct
+    setPlates(arr => [...arr, plateName]);
+    setAddPlateLoading(false);
+    setOpenAdd(false);
+  };
+
   const handleClose = () => {
     setOpen(false);
   };
 
+  const handleCloseAdd = () => {
+    setOpenAdd(false);
+  };
+
   const classes = useStyle();
+
+  let platesList: JSX.Element;
+  if (!plates.length) {
+    platesList = <p>You have no vehicles!</p>;
+  } else {
+    platesList = <>
+      {plates.map(plate => (
+        // change this later if it looks ugly i guess
+        <p key={plate}><b>License plate:</b> {plate}</p>
+      ))}
+    </>;
+  }
 
   let contents: JSX.Element;
   if (userId === null) {
@@ -103,6 +142,7 @@ export default function profile() {
           <Typography variant="h6" align="left">User Name: {firstName} {lastName}</Typography>
           <Typography variant="h6" align="left">Email: {email}</Typography>
           <Typography variant="h6" align="left">Car Information</Typography>
+          {platesList}
           {/*
           <Typography variant="h6" align="left">Make: {make} </Typography>
           <Typography variant="h6" align="left">Model: {model}</Typography>
@@ -132,6 +172,20 @@ export default function profile() {
           Edit
           </Button>
         </DialogActions>
+      </Dialog>
+      <Fab className={styles.fab2} onClick={() => setOpenAdd(true)} color="secondary" aria-label="edit">
+        <Add />
+      </Fab>
+      <Dialog open={openAdd} onClose={() => setOpenAdd(false)}>
+        <DialogTitle> Add Vehicle License Plate </DialogTitle>
+        <DialogContent>
+          <TextField value={plateName} label="License Plate" variant="outlined" margin="normal" fullWidth required onChange={event => setPlate(event.target.value)}>{plateName}</TextField>
+          <Button onClick={() => handleCloseAdd()}> Cancel </Button>
+          <Button onClick={() => addPlate(plateName)}>
+            Add
+          </Button>
+          {addPlateLoading ? <p>Adding vehicle...</p> : null}
+        </DialogContent>
       </Dialog>
     </>;
   }

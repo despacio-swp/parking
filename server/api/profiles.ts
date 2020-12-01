@@ -26,8 +26,8 @@ router.get('/:userId', wrapAsync(async (req, res) => {
     return;
   }
   let user = userQuery.rows[0];
-  let vehiclesQuery = await db.query('SELECT plateId FROM vehicles WHERE userId = $1', [user.userId]);
-  let vehicles = vehiclesQuery.rows.map(a => a.plateId);
+  let vehiclesQuery = await db.query('SELECT plateId FROM vehicles WHERE userId = $1', [user.userid]);
+  let vehicles = vehiclesQuery.rows.map(a => a.plateid);
   res.send({
     userId: user.userid,
     firstName: user.firstname,
@@ -74,5 +74,60 @@ router.post('/self', validateSession, wrapAsync(async (req, res) => {
     status: 'ok',
     firstName, lastName, email
   });
+}));
+router.put('/self/vehicles/:plateId', validateSession, wrapAsync(async (req, res) => {
+  if (!req.session) {
+    res.status(401).send({
+      status: 'error',
+      error: 'NOT_AUTHENTICATED',
+      description: 'no session exists'
+    });
+    return;
+  }
+
+  // body can be empty probably
+  let userId = req.session.userId;
+  let plateId = req.params.plateId;
+  // TODO: error checking if needed
+  let vehiclesQuery = await db.query(
+    'INSERT INTO vehicles (plateid, userid) VALUES ($1, $2)', [plateId, userId]
+  );
+  if (vehiclesQuery.rowCount !== 1) {
+    res.status(500).send({
+      status: 'error',
+      error: 'ADD_VEHICLE_FAILED',
+      description: `expected insert of 1 row but found ${vehiclesQuery.rowCount}`
+    });
+    return;
+  }
+
+  res.send({ status: 'ok' });
+}));
+router.delete('/self/vehicles/:plateId', validateSession, wrapAsync(async (req, res) => {
+  if (!req.session) {
+    res.status(401).send({
+      status: 'error',
+      error: 'NOT_AUTHENTICATED',
+      description: 'no session exists'
+    });
+    return;
+  }
+
+  // body can be empty probably
+  let userId = req.session.userId;
+  let plateId = req.params.plateId;
+  // TODO: error checking if needed
+  let vehiclesQuery = await db.query(
+    'DELETE FROM vehicles WHERE plateId = $1 AND userId = $2', [plateId, userId]
+  );
+  if (vehiclesQuery.rowCount !== 1) {
+    res.status(404).send({
+      status: 'error',
+      error: 'REMOVE_VEHICLE_FAILED',
+      description: 'given vehicle not found'
+    });
+    return;
+  }
+  res.send({ status: 'ok' });
 }));
 export default router;
