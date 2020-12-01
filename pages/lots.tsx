@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import AppMenu from '../components/AppMenu';
 import {Grid, Menu, MenuItem, TextField, Button, IconButton, Fab, Typography} from '@material-ui/core';
 import {Card, CardHeader, CardContent, CardActions, Collapse, List, ListItem, ListItemText} from '@material-ui/core';
 import {Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions} from '@material-ui/core';
 import {MoreVert, ExpandMore, Add} from '@material-ui/icons';
 import styles from './lots.module.scss';
+import axios from 'axios';
 
 interface Lot {
+    id: number;
     name: string;
     location: string;
     size: number;
@@ -89,6 +91,11 @@ export default function LotPage() {
     const [openAddDialog, setOpenAddDialog] = React.useState(false);
     const [openEditDialog, setOpenEditDialog] = React.useState(false);
 
+    useEffect(() => {async () => {
+        let response = await axios.get('/api/v1/lots');
+        response.data.forEach(lot => setLots([...lots, {lot.lotId, lot.lotDescription, lot.lotAddress, lot.capacity, capacity: 0, lot.pricePerHour}]))
+    }}, []);
+
     const handleOpenAddDialog = () => {
         setName("");
         setLocation("");
@@ -111,11 +118,12 @@ export default function LotPage() {
         lot.size = +size;
         lot.price = +price
         setOpenEditDialog(false);
+        await axios.post('/api/v1/lots' + lot.id, {capacity: size, lotAddress: location, pricePerHour: price, lotDescription: name});
     };
 
     const handleAdd = (name: string, location: string, size: number, price: number) => {
-        const lot: Lot = {name, location, size, capacity: 0, price};
-        setLots([...lots, lot]);
+        let response = await axios.post('/api/v1/lots/lot', {capacity: size, lotAddress: location, pricePerHour: price, lotDescription: name});
+        setLots([...lots, {response.data.lotId, name, location, size, capacity: 0, price}]);
         setOpenAddDialog(false);
     };
 
