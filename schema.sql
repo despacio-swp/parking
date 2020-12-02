@@ -49,10 +49,8 @@ CREATE TABLE protests (
 CREATE TABLE links (
     linkId text PRIMARY KEY,
     protestId text REFERENCES protests (protestId) NOT NULL,
-    protestAddress text REFERENCES protests (protestAddress) NOT NULL,
-    lotId text REFERENCES parkingLots (lotId) NOT NULL,
-    lotAddress text REFERENCES parkignLots (lotAddress) NOT NULL
-)
+    lotId text REFERENCES parkingLots (lotId) NOT NULL
+);
 
 CREATE TABLE lotOccupancy (
     plateId text REFERENCES vehicles (plateId) NOT NULL,
