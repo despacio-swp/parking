@@ -105,7 +105,7 @@ export default function LotPage() {
     };
 
     const handleOpenEditDialog = (lot: Lot) => {
-        setName(lot.name);
+        //setName(lot.name);
         setLocation(lot.location);
         setCapacity(lot.capacity.toString());
         setPrice(lot.price.toString());
@@ -113,7 +113,7 @@ export default function LotPage() {
     };
 
     const handleEdit = (lot: Lot) => {
-        lot.name = name;
+        //lot.name = name;
         lot.location = location;
         lot.capacity = +capacity;
         lot.price = +price
@@ -125,6 +125,11 @@ export default function LotPage() {
         let response = await axios.post('/api/v1/lots/lot', {capacity: capacity, lotAddress: location, pricePerHour: price, lotDescription: name});
         setLots([...lots, {response.data.lotId, name, location, capacity, occupancy: 0, price}]);
         setOpenAddDialog(false);
+        post();
+    };
+
+    async function post() {
+        await axios.post('/api/v1/lots/lot', {capacity: 0, lotAddress:"miami", pricePerHour:2, lotDescription:"hello"})
     };
 
     const handleDelete = (lot: Lot) => {
@@ -169,7 +174,7 @@ export default function LotPage() {
                                 onChange={event => setName(event.target.value)} 
                                 error={error("name")}
                                 helperText={errorText("name")}
-                                placeholder={lot.name}
+                                //placeholder={lot.name}
                             />
                             <TextField value={location} label="Location" margin="normal" fullWidth 
                                 onChange={event => setLocation(event.target.value)} 
