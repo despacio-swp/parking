@@ -7,7 +7,6 @@ import db from '../db';
 import { wrapAsync } from '../common';
 import { validateSession } from './accounts';
 
-
 let router = express.Router(); // eslint-disable-line new-cap
 let jsonParse = bodyParser.json();
 let cookieParse = cookieParser();
@@ -24,9 +23,8 @@ router.get('/', (_req, res) => res.send({ status: 'ok' }));
   GET REQUEST for All Lots
 */
 router.get('/all', wrapAsync(async (req, res) => {
-  let lots = await db.query('SELECT userId, capacity, lotAddress, pricePerHour, lotDescription FROM parkingLots');
-  
-  //trying to send all lots at once
+  let lots = await db.query('SELECT lotId, userId, capacity, lotAddress, pricePerHour, lotDescription FROM parkingLots');
+  // send all lots at once
   res.status(200).send({
     lots: lots.rows
   });
@@ -101,9 +99,9 @@ router.put('/:lotId', validateSession, wrapAsync(async (req, res) => {
   // possible null parameters
   let lotDescription = req.body.lotDescription || null;
 
-  let lot = (await db.query('UPDATE parkingLots SET capacity = $3, lotAddress = $4, pricePerHour = $5, lotDescription = $6 WHERE lotId = $1 AND userId = $2' +
-    'ON CONFLICT DO NOTHING', [lotId, userId, capacity, lotAddress, pricePerHour, lotDescription]));
-  
+  let lot = (await db.query('UPDATE parkingLots SET capacity = $3, lotAddress = $4, pricePerHour = $5, lotDescription = $6 WHERE lotId = $1 AND userId = $2',
+    [lotId, userId, capacity, lotAddress, pricePerHour, lotDescription]));
+
   res.status(200).send({
     status: 'ok',
     lotId: lotId,
@@ -181,6 +179,7 @@ router.post('/lot', validateSession, wrapAsync(async (req, res) => {
       status: 'ok',
       lotId: lotId,
       userId: userId,
+      capacity: capacity,
       lotAddress: lotAddress,
       pricePerHour: pricePerHour,
       lotDescription: lotDescription
