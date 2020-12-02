@@ -29,10 +29,38 @@ export default function Search(this: any) {
   let router = useRouter();
   let listNum = 1;
 
+
   async function getEntries() {
+    
+  }
+
+  async function getOccupancy() {
     let response;
     try {
-      console.log('getting');
+      response = await axios.get('/api/v1/presence/lots/');
+    }
+    catch (err) {
+      if (err.response) response = err.response;
+      else throw err;
+    }
+    if(response.data === null) {
+      console.log('Error!');
+    }
+    return response;
+  }
+
+
+  async function renderEntries() {
+    /*let elements = [0, 1, 2, 3, 4, 5].map(value => {
+      React.cloneElement(element, {
+        key: value,
+
+      })
+    },
+    );*/
+    console.log('Get Entries');
+    let response;
+    try {
       response = await axios.get('/api/v1/lots/all');
     }
     catch (err) {
@@ -41,33 +69,20 @@ export default function Search(this: any) {
     }
     if(response.data === null) {
       console.log('Error!');
-    } else {
-      console.log(response);
     }
-    return response;
-  }
-
-
-  function renderEntries(element: JSX.Element) {
-    console.log('Loading entries');
-    let elements = [0, 1, 2, 3, 4, 5].map(value => {
-      React.cloneElement(element, {
-        key: value,
-
-      })
-    },
-    );
-    let vals = getEntries();
+    let vals = response.data.lots;
+    console.log('Vals');
     console.log(vals);
+    let elements = vals.map();
     return elements;
   }
 
-  function lotSelector() {
+  function lotSelector(address: string, capacity: number) {
     let fragment = <Box className={styles.searchBox} boxShadow={3}>
       <ListItem>
         <ListItemText
-          primary={'Generated Sample Parking Lot #' + listNum}
-          secondary={'Sample Address #' + listNum}
+          primary={'Address: ' + address}
+          secondary={'Capacity: ' + capacity}
         />
         <ListItemSecondaryAction>
           <Link href="/lotProfile" passHref>
@@ -89,20 +104,20 @@ export default function Search(this: any) {
     <div className={styles.searchFilter}>
       <FormControl component="fieldset">
         <FormLabel component="legend">Search by:</FormLabel>
-        <RadioGroup aria-label="filter" name="filter" value={value} onChange={(ev: React.ChangeEvent<HTMLInputElement>,
+        <RadioGroup aria-label="filter" color="#556cd6" name="filter" value={value} onChange={(ev: React.ChangeEvent<HTMLInputElement>,
             ): void => setValue(ev.target.value)}>
-          <FormControlLabel value="name" color="primary" control={<Radio />} label="Name" />
-          <FormControlLabel value="address" color="primary" control={<Radio />} label="Address" />
-          <FormControlLabel value="capacity" color="primary" control={<Radio />} label="Capacity" />
-          <FormControlLabel value="protest" color="primary" control={<Radio />} label="Protest" />
-          <FormControlLabel value="tags" color="primary" control={<Radio />} label="Tags" />
+          <FormControlLabel value="name" color="#556cd6" control={<Radio />} label="Name" />
+          <FormControlLabel value="address" color="#556cd6" control={<Radio />} label="Address" />
+          <FormControlLabel value="capacity" color="#556cd6" control={<Radio />} label="Capacity" />
+          <FormControlLabel value="protest" color="#556cd6" control={<Radio />} label="Protest" />
+          <FormControlLabel value="tags" color="#556cd6" control={<Radio />} label="Tags" />
         </RadioGroup>
       </FormControl>
     </div>
     <SearchBar className={styles.searchBar} onChange={e => { setQuery({ query: e }) }} onRequestSearch={() => console.log(query)} onCancelSearch={() => setQuery({ query: '' })} />
     <div>
       <List className={styles.searchResult}>
-        {renderEntries(lotSelector())}
+        {renderEntries()}
       </List>
     </div>
   </React.Fragment>;
