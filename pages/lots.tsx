@@ -91,10 +91,17 @@ export default function LotPage() {
     const [openAddDialog, setOpenAddDialog] = React.useState(false);
     const [openEditDialog, setOpenEditDialog] = React.useState(false);
 
-    useEffect(() => {async () => {
-        let response = await axios.get('/api/v1/lots');
-        response.data.forEach(lot => setLots([...lots, {lot.lotId, lot.lotDescription, lot.lotAddress, lot.capacity, occupancy: 0, lot.pricePerHour}]))
-    }}, []);
+    useEffect(() => void (async () => {
+        let response = await axios.get('/api/v1/lots/all');
+        setLots(response.data.lots.map((lot: any) => ({
+            id: lot.lotid,
+            name: lot.lotdescription,
+            location: lot.lotaddress,
+            capacity: lot.capacity,
+            occupancy: 0,
+            price: lot.priceperhour
+        })));
+    })(), []);
 
     const handleOpenAddDialog = () => {
         setName("");
@@ -112,22 +119,30 @@ export default function LotPage() {
         setOpenEditDialog(true);
     };
 
-    const handleEdit = (lot: Lot) => {
-        lot.name = name;
-        lot.location = location;
-        lot.capacity = +capacity;
-        lot.price = +price
+    const handleEdit = async (lot: Lot) => {
+        let response = await axios.post('/api/v1/lots/' + lot.id, {capacity: +capacity, lotAddress: location, pricePerHour: +price, lotDescription: name});
+        // TODO: error handling if necessary or loading state
+        let data = response.data;
+        let newData = Object.assign({}, lot, {
+            name: data.lotDescription,
+            location: data.lotAddress,
+            capacity: data.capacity,
+            price: data.pricePerHour
+        });
+        setLots([newData, ...lots.filter(item => item !== lot)]);
         setOpenEditDialog(false);
-        await axios.post('/api/v1/lots' + lot.id, {occupancy: capacity, lotAddress: location, pricePerHour: price, lotDescription: name});
     };
 
-    const handleAdd = (name: string, location: string, capacity: number, price: number) => {
+    const handleAdd = async (name: string, location: string, capacity: number, price: number) => {
         let response = await axios.post('/api/v1/lots/lot', {capacity: capacity, lotAddress: location, pricePerHour: price, lotDescription: name});
-        setLots([...lots, {response.data.lotId, name, location, capacity, occupancy: 0, price}]);
+        let data = response.data;
+        console.log(data);
+        setLots([...lots, { id: data.lotId, name: data.lotDescription, location: data.lotAddress, capacity: data.capacity, occupancy: 0, price: data.pricePerHour }]);
         setOpenAddDialog(false);
     };
 
-    const handleDelete = (lot: Lot) => {
+    const handleDelete = async (lot: Lot) => {
+        let response = await axios.delete('/api/v1/lots/' + lot.id);
         setLots(lots.filter(item => item !== lot));
     };
 
@@ -138,11 +153,11 @@ export default function LotPage() {
             case "location":
                 return location === "";
             case "capacity":
-                return !capacity.match("^([1-9]|[1-9][0-9]{0,2})$");
+                return !capacity.match(/^([1-9]|[1-9][0-9]{0,2})$/);
             case "price":
-                return !price.match("^([1-9]|[1-9][0-9]?|[1-9][.][0-9]{0,2}|[1-9][0-9][.][0-9]{0,2})$");
+                return !price.match(/^([1-9]|[1-9][0-9]?|[1-9][.][0-9]{0,2}|[1-9][0-9][.][0-9]{0,2})$/);
             default:
-                return name === "" || location === "" || !capacity.match("^([1-9]|[1-9][0-9]{0,2})$") || !price.match("^([1-9]|[1-9][0-9]?|[1-9][.][0-9]{0,2}|[1-9][0-9][.][0-9]{0,2})$");
+                return name === "" || location === "" || !capacity.match(/^([1-9]|[1-9][0-9]{0,2})$/) || !price.match(/^([1-9]|[1-9][0-9]?|[1-9][.][0-9]{0,2}|[1-9][0-9][.][0-9]{0,2})$/);
         }
     };
 
@@ -179,7 +194,7 @@ export default function LotPage() {
                             />
                             <TextField value={capacity} label="Spaces" margin="normal" fullWidth 
                                 onChange={event =>  {
-                                    if (event.target.value.match("^([]*|[1-9]|[1-9][0-9]{0,2})$")) {
+                                    if (event.target.value.match(/^([]*|[1-9]|[1-9][0-9]{0,2})$/)) {
                                         setCapacity(event.target.value);
                                     }
                                 }}
@@ -189,7 +204,7 @@ export default function LotPage() {
                             />
                             <TextField value={price} label="Price (per hour)" margin="normal" fullWidth 
                                 onChange={event =>  {
-                                    if (event.target.value.match("^([]*|[1-9]|[1-9][0-9]?|[1-9][.][0-9]{0,2}|[1-9][0-9][.][0-9]{0,2})$")) {
+                                    if (event.target.value.match(/^([]*|[1-9]|[1-9][0-9]?|[1-9][.][0-9]{0,2}|[1-9][0-9][.][0-9]{0,2})$/)) {
                                         setPrice(event.target.value);
                                     }
                                 }}
@@ -224,7 +239,7 @@ export default function LotPage() {
                     />
                     <TextField value={capacity} label="Spaces" margin="normal" fullWidth 
                         onChange={event =>  {
-                            if (event.target.value.match("^([]*|[1-9]|[1-9][0-9]{0,2})$")) {
+                            if (event.target.value.match(/^([]*|[1-9]|[1-9][0-9]{0,2})$/)) {
                                 setCapacity(event.target.value);
                             }
                         }}
@@ -233,7 +248,7 @@ export default function LotPage() {
                     />
                     <TextField value={price} label="Price (per hour)" margin="normal" fullWidth
                         onChange={event =>  {
-                            if (event.target.value.match("^([]*|[1-9]|[1-9][0-9]?|[1-9][.][0-9]{0,2}|[1-9][0-9][.][0-9]{0,2})$")) {
+                            if (event.target.value.match(/^([]*|[1-9]|[1-9][0-9]?|[1-9][.][0-9]{0,2}|[1-9][0-9][.][0-9]{0,2})$/)) {
                                 setPrice(event.target.value);
                             }
                         }}
