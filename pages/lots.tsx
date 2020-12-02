@@ -11,18 +11,18 @@ interface Lot {
     id: number;
     name: string;
     location: string;
-    size: number;
     capacity: number;
+    occupancy: number;
     price: number;
 }
 
-interface Customer {
+interface Occupant {
     name: string;
     license: string;
 }
 
 function LotCard(props: any) {
-    const [customers, setCustomers] = React.useState<Customer[]>([]);
+    const [occupants, setOccupants] = React.useState<Occupant[]>([]);
     const [expanded, setExpanded] = React.useState(false);
     const [anchorEl, setAnchorEl] = React.useState(null);
 
@@ -61,7 +61,7 @@ function LotCard(props: any) {
                     <MenuItem onClick={handleDelete}> Delete </MenuItem>
                 </Menu>
                 <CardActions disableSpacing>
-                    <Button disabled> {props.lot.capacity} / {props.lot.size} </Button>
+                    <Button disabled> {props.lot.occupancy} / {props.lot.capacity} </Button>
                     <IconButton className={styles.expand} onClick={() => setExpanded(!expanded)}>
                         <ExpandMore />
                     </IconButton>
@@ -69,9 +69,9 @@ function LotCard(props: any) {
                 <Collapse in={expanded} timeout="auto" unmountOnExit>
                     <CardContent>
                         <List>
-                            {customers.map(customer => {
+                            {occupants.map(occupant => {
                                 <ListItem dense>
-                                    <ListItemText primary={customer.name} secondary={customer.license} />
+                                    <ListItemText primary={occupant.name} secondary={occupant.license} />
                                 </ListItem>
                             })}
                         </List>
@@ -86,20 +86,20 @@ export default function LotPage() {
     const [lots, setLots] = React.useState<Lot[]>([]);
     const [name, setName] = React.useState("");
     const [location, setLocation] = React.useState("");
-    const [size, setSize] = React.useState("");
+    const [capacity, setCapacity] = React.useState("");
     const [price, setPrice] = React.useState("");
     const [openAddDialog, setOpenAddDialog] = React.useState(false);
     const [openEditDialog, setOpenEditDialog] = React.useState(false);
 
     useEffect(() => {async () => {
         let response = await axios.get('/api/v1/lots');
-        response.data.forEach(lot => setLots([...lots, {lot.lotId, lot.lotDescription, lot.lotAddress, lot.capacity, capacity: 0, lot.pricePerHour}]))
+        response.data.forEach(lot => setLots([...lots, {lot.lotId, lot.lotDescription, lot.lotAddress, lot.capacity, occupancy: 0, lot.pricePerHour}]))
     }}, []);
 
     const handleOpenAddDialog = () => {
         setName("");
         setLocation("");
-        setSize("");
+        setCapacity("");
         setPrice("");
         setOpenAddDialog(true);
     };
@@ -107,7 +107,7 @@ export default function LotPage() {
     const handleOpenEditDialog = (lot: Lot) => {
         setName(lot.name);
         setLocation(lot.location);
-        setSize(lot.size.toString());
+        setCapacity(lot.capacity.toString());
         setPrice(lot.price.toString());
         setOpenEditDialog(true);
     };
@@ -115,15 +115,15 @@ export default function LotPage() {
     const handleEdit = (lot: Lot) => {
         lot.name = name;
         lot.location = location;
-        lot.size = +size;
+        lot.capacity = +capacity;
         lot.price = +price
         setOpenEditDialog(false);
-        await axios.post('/api/v1/lots' + lot.id, {capacity: size, lotAddress: location, pricePerHour: price, lotDescription: name});
+        await axios.post('/api/v1/lots' + lot.id, {occupancy: capacity, lotAddress: location, pricePerHour: price, lotDescription: name});
     };
 
-    const handleAdd = (name: string, location: string, size: number, price: number) => {
-        let response = await axios.post('/api/v1/lots/lot', {capacity: size, lotAddress: location, pricePerHour: price, lotDescription: name});
-        setLots([...lots, {response.data.lotId, name, location, size, capacity: 0, price}]);
+    const handleAdd = (name: string, location: string, capacity: number, price: number) => {
+        let response = await axios.post('/api/v1/lots/lot', {capacity: capacity, lotAddress: location, pricePerHour: price, lotDescription: name});
+        setLots([...lots, {response.data.lotId, name, location, capacity, occupancy: 0, price}]);
         setOpenAddDialog(false);
     };
 
@@ -137,12 +137,12 @@ export default function LotPage() {
                 return name === "";
             case "location":
                 return location === "";
-            case "size":
-                return !size.match("^([1-9]|[1-9][0-9]{0,2})$");
+            case "capacity":
+                return !capacity.match("^([1-9]|[1-9][0-9]{0,2})$");
             case "price":
                 return !price.match("^([1-9]|[1-9][0-9]?|[1-9][.][0-9]{0,2}|[1-9][0-9][.][0-9]{0,2})$");
             default:
-                return name === "" || location === "" || !size.match("^([1-9]|[1-9][0-9]{0,2})$") || !price.match("^([1-9]|[1-9][0-9]?|[1-9][.][0-9]{0,2}|[1-9][0-9][.][0-9]{0,2})$");
+                return name === "" || location === "" || !capacity.match("^([1-9]|[1-9][0-9]{0,2})$") || !price.match("^([1-9]|[1-9][0-9]?|[1-9][.][0-9]{0,2}|[1-9][0-9][.][0-9]{0,2})$");
         }
     };
 
@@ -177,15 +177,15 @@ export default function LotPage() {
                                 helperText={errorText("location")}
                                 placeholder={lot.location}
                             />
-                            <TextField value={size} label="Spaces" margin="normal" fullWidth 
+                            <TextField value={capacity} label="Spaces" margin="normal" fullWidth 
                                 onChange={event =>  {
                                     if (event.target.value.match("^([]*|[1-9]|[1-9][0-9]{0,2})$")) {
-                                        setSize(event.target.value);
+                                        setCapacity(event.target.value);
                                     }
                                 }}
-                                error={error("size")}
-                                helperText={errorText("size")}
-                                placeholder={lot.size.toString()}
+                                error={error("capacity")}
+                                helperText={errorText("capacity")}
+                                placeholder={lot.capacity.toString()}
                             />
                             <TextField value={price} label="Price (per hour)" margin="normal" fullWidth 
                                 onChange={event =>  {
@@ -222,14 +222,14 @@ export default function LotPage() {
                         error={error("location")}
                         helperText={errorText("location")}
                     />
-                    <TextField value={size} label="Size" margin="normal" fullWidth 
+                    <TextField value={capacity} label="Spaces" margin="normal" fullWidth 
                         onChange={event =>  {
                             if (event.target.value.match("^([]*|[1-9]|[1-9][0-9]{0,2})$")) {
-                                setSize(event.target.value);
+                                setCapacity(event.target.value);
                             }
                         }}
-                        error={error("size")}
-                        helperText={errorText("size")}
+                        error={error("capacity")}
+                        helperText={errorText("capacity")}
                     />
                     <TextField value={price} label="Price (per hour)" margin="normal" fullWidth
                         onChange={event =>  {
@@ -243,7 +243,7 @@ export default function LotPage() {
                 </DialogContent>
                 <DialogActions>
                     <Button color="primary" onClick={() => setOpenAddDialog(false)}> Cancel </Button>
-                    <Button disabled={error("")} color="primary" onClick={() => handleAdd(name, location, +size, +price)}> Create </Button>
+                    <Button disabled={error("")} color="primary" onClick={() => handleAdd(name, location, +capacity, +price)}> Create </Button>
                 </DialogActions>
             </Dialog>
         </React.Fragment>
