@@ -103,6 +103,34 @@ let createProtestSchema = ajv.compile({
 });
 
 /*
+  DELETE Request
+*/
+router.delete('/:protestId', validateSession, wrapAsync(async (req, res) => {
+  if (!req.session) {
+    res.status(401).send({
+      status: 'error',
+      error: 'NOT_AUTHENTICATED',
+      details: 'no session exists'
+    });
+    return;
+  }
+
+  let protestId = req.params.protestId;
+  let userId = req.session.userId;
+
+  let query = await db.query('DELETE FROM protests WHERE protestId = $1 AND userId = $2', [protestId, userId]);
+  if (!query.rowCount) {
+    res.status(404).send({
+      status: 'error',
+      error: 'NONEXISTENT_PROTEST',
+      description: 'protest does not exist'
+    });
+  } else {
+    res.status(200).send({ status: 'ok' });
+  }
+}));
+
+/*
   POST REQUEST
 */
 router.post('/protest', wrapAsync(async (req, res) => {
