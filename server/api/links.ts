@@ -86,17 +86,30 @@ let createLinkSchema = ajv.compile({
 });
 
 /*
+  DELETE Request
+*/
+router.delete('/:linkId', validateSession, wrapAsync(async (req, res) => {
+  
+
+  let lotId = req.params.lotId;
+
+  let query = await db.query('DELETE FROM links WHERE linkId = $1', [lotId]);
+  if (!query.rowCount) {
+    res.status(404).send({
+      status: 'error',
+      error: 'NONEXISTENT_LOT',
+      description: 'lot does not exist'
+    });
+  } else {
+    res.status(200).send({ status: 'ok' });
+  }
+}));
+
+/*
   POST REQUEST
 */
 router.post('/link', validateSession, wrapAsync(async (req, res) => {
-  if (!req.session) {
-    res.status(401).send({
-      status: 'error',
-      error: 'NOT_AUTHENTICATED',
-      details: 'no session exists'
-    });
-    return;
-  }
+  
   if (!createLinkSchema(req.body)) {
     res.status(400).send({
       status: 'error',

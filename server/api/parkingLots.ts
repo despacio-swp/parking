@@ -113,6 +113,9 @@ router.put('/:lotId', validateSession, wrapAsync(async (req, res) => {
   });
 }));
 
+/*
+  DELETE Request
+*/
 router.delete('/:lotId', validateSession, wrapAsync(async (req, res) => {
   if (!req.session) {
     res.status(401).send({
