@@ -108,7 +108,7 @@ export default function Search(this: any) {
     (async () => {
       setLotEntries(await renderEntries());
     })();
-  }, []);
+  }, [value]);
 
 
 
