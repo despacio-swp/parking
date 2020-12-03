@@ -20,7 +20,7 @@ export default function App() {
       <ListLink target="searchLots"/>
       <ListLink target="lotProfile" />
       <ListLink target="register" />
-      <ListLink target="userProfile" />
+      <ListLink target="profiles/self" />
       <ListLink target="lots" />
       <ListLink target="protests" />
     </ul>
