@@ -3,7 +3,9 @@ import AppMenu from '../components/AppMenu';
 import {Grid, Menu, MenuItem, TextField, Button, IconButton, Fab} from '@material-ui/core';
 import {Card, CardHeader, CardContent, CardActions, Collapse} from '@material-ui/core';
 import {Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions} from '@material-ui/core';
-import {MoreVert, ExpandMore, Add} from '@material-ui/icons';
+import MoreVert from '@material-ui/icons/MoreVert';
+import ExpandMore from '@material-ui/icons/ExpandMore';
+import Add from '@material-ui/icons/Add';
 import styles from './lots.module.scss';
 
 interface Protest {
