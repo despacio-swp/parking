@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import SearchBar from 'material-ui-search-bar';
@@ -15,50 +15,13 @@ import Link from 'next/link';
 import axios from 'axios';
 
 export default function Search(this: any) {
-  const [dense, setDense] = React.useState(false);
-  const [secondary, setSecondary] = React.useState(false);
-  const [query, setQuery] = React.useState({ query: '' });
-
-  const [lotId, setLotId] = React.useState({ lotId: '' });
-  const [capacity, setCapacity] = React.useState({ capacity: 0 });
-  const [lotAddress, setLotAddress] = React.useState({ address: '' });
-  const [lotDescription, setLotDescription] = React.useState({ description: '' });
-  const [value, setValue] = React.useState('name');
-  let [requestError, setRequestError] = React.useState<string | null>(null);
-  let [requestSuccess, setRequestSuccess] = React.useState(false);
-  let router = useRouter();
-  let listNum = 1;
+  let [query, setQuery] = React.useState({ query: '' });
+  let [value, setValue] = React.useState('address');
+  let [lotEntries, setLotEntries] = useState<JSX.Element[]>([<p>Loading</p>]); // stupid placeholder
+  let [lotOccupancy, setOccupancy] = useState<number[]>([0]);
 
 
   async function getEntries() {
-    
-  }
-
-  async function getOccupancy() {
-    let response;
-    try {
-      response = await axios.get('/api/v1/presence/lots/');
-    }
-    catch (err) {
-      if (err.response) response = err.response;
-      else throw err;
-    }
-    if(response.data === null) {
-      console.log('Error!');
-    }
-    return response;
-  }
-
-
-  async function renderEntries() {
-    /*let elements = [0, 1, 2, 3, 4, 5].map(value => {
-      React.cloneElement(element, {
-        key: value,
-
-      })
-    },
-    );*/
-    console.log('Get Entries');
     let response;
     try {
       response = await axios.get('/api/v1/lots/all');
@@ -67,34 +30,87 @@ export default function Search(this: any) {
       if (err.response) response = err.response;
       else throw err;
     }
-    if(response.data === null) {
+    if (response.data === null) {
       console.log('Error!');
     }
-    let vals = response.data.lots;
-    console.log('Vals');
-    console.log(vals);
-    let elements = vals.map();
-    return elements;
+    return response.data.lots;
+  }
+
+  async function getOccupancy() {
+    let response;
+    try {
+      response = await axios.get('/api/v1/presence/');
+    }
+    catch (err) {
+      if (err.response) response = err.response;
+      else throw err;
+    }
+    if (response.data === null) {
+      console.log('Error!');
+    }
+    return response.data;
   }
 
   function lotSelector(address: string, capacity: number) {
-    let fragment = <Box className={styles.searchBox} boxShadow={3}>
-      <ListItem>
-        <ListItemText
-          primary={'Address: ' + address}
-          secondary={'Capacity: ' + capacity}
-        />
-        <ListItemSecondaryAction>
-          <Link href="/lotProfile" passHref>
-            <Button variant="contained" color="primary">
-              Select
-          </Button>
-          </Link>
-        </ListItemSecondaryAction>
-      </ListItem>
-    </Box>;
-    return fragment;
+    return (
+      <React.Fragment key={ address + ' | ' + capacity.toString()}>
+        <Box className={styles.searchBox} boxShadow={3}>
+          <ListItem>
+            <ListItemText
+              primary={'Address: ' + address}
+              secondary={'Capacity: ' + capacity}
+            />
+            <ListItemSecondaryAction>
+              <Link href="/lotProfile" passHref>
+                <Button variant="contained" color="primary">
+                  Select
+        </Button>
+              </Link>
+            </ListItemSecondaryAction>
+          </ListItem>
+        </Box>
+      </React.Fragment>
+    )
   }
+
+  async function renderEntries() {
+    let vals = await getEntries();
+    let elements = vals.map((lot: any) => lotSelector(lot.lotaddress, lot.capacity));
+    handleSort(elements);
+    return elements;
+  }
+
+  function handleSort(elements: JSX.Element[]) {
+    if(value == 'address'){
+      elements.sort(function(a, b) {
+        let keyA = a.key!.toString();
+        let keyB = b.key!.toString();
+        let addA = keyA.substring(0, keyA.indexOf(" | "));
+        let addB = keyB.substring(0, keyB.indexOf(" | "));
+        return addA > addB ? 1 : -1;
+    })
+    } else {
+      elements.sort(function(a, b) {
+        let keyA = a.key!.toString();
+        let keyB = b.key!.toString();
+        let capA = parseInt(keyA.substring(keyA.indexOf(" | ")));
+        let capB = parseInt(keyB.substring(keyB.indexOf(" | ")));
+        return capA - capB;
+    })
+        
+    }
+    elements.forEach(element => {
+      console.log(element.key);
+    });
+  }
+
+  useEffect(() => {
+    (async () => {
+      setLotEntries(await renderEntries());
+    })();
+  }, []);
+
+
 
   return <React.Fragment>
     <Head>
@@ -103,21 +119,18 @@ export default function Search(this: any) {
     <AppMenu page="Search" />
     <div className={styles.searchFilter}>
       <FormControl component="fieldset">
-        <FormLabel component="legend">Search by:</FormLabel>
+        <FormLabel component="legend">Sort by:</FormLabel>
         <RadioGroup aria-label="filter" color="#556cd6" name="filter" value={value} onChange={(ev: React.ChangeEvent<HTMLInputElement>,
-            ): void => setValue(ev.target.value)}>
-          <FormControlLabel value="name" color="#556cd6" control={<Radio />} label="Name" />
-          <FormControlLabel value="address" color="#556cd6" control={<Radio />} label="Address" />
-          <FormControlLabel value="capacity" color="#556cd6" control={<Radio />} label="Capacity" />
-          <FormControlLabel value="protest" color="#556cd6" control={<Radio />} label="Protest" />
-          <FormControlLabel value="tags" color="#556cd6" control={<Radio />} label="Tags" />
+        ): void => setValue(ev.target.value)}>
+          <FormControlLabel className={styles.radioSort} value="address" control={<Radio color="primary" />} label="Address" />
+          <FormControlLabel className={styles.radioSort} value="capacity" control={<Radio color="primary" />} label="Capacity" />
         </RadioGroup>
       </FormControl>
     </div>
     <SearchBar className={styles.searchBar} onChange={e => { setQuery({ query: e }) }} onRequestSearch={() => console.log(query)} onCancelSearch={() => setQuery({ query: '' })} />
     <div>
       <List className={styles.searchResult}>
-        {renderEntries()}
+        {lotEntries}
       </List>
     </div>
   </React.Fragment>;

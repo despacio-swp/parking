@@ -27,7 +27,7 @@ router.get('/lots/all', wrapAsync(async (req, res) => {
   });
 }));
 
-router.get('lots/current', wrapAsync(async (res, req) => {
+router.get('/lots/current', wrapAsync(async (res, req) => {
 
 }));
 
