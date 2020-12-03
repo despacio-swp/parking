@@ -105,8 +105,8 @@ router.put('/:protestId',validateSession, wrapAsync(async (req, res) => {
   // possible null parameters
   let protestDescription = req.params.protestDescription;
 
-  let protest = (await db.query('UPDATE protests SET protestDate = $3, protestName = $4, email = $5, protestAddress = $6, protestDescription = $7 WHERE protestId = $1 AND userId = $2' +
-    'ON CONFLICT DO NOTHING', [protestId,userId,protestDate,protestName,email, protestAddress,protestDescription]));
+  let protest = (await db.query('UPDATE protests SET protestDate = $3, protestName = $4, email = $5, protestAddress = $6, protestDescription = $7 WHERE protestId = $1 AND userId = $2' , 
+  [protestId,userId,protestDate,protestName,email, protestAddress,protestDescription]));
   
     res.status(200).send({
     status: 'ok',
