@@ -31,7 +31,31 @@ router.get('/all', wrapAsync(async (req, res) => {
 }));
 
 /*
-  GET REQUEST
+    GET REQUEST for lots per user
+*/
+router.get('/user/:userId', wrapAsync(async (req, res) => {
+
+  let lotId = req.params.lotId;
+  let userId = req.params.userId;
+  let query = (await db.query('SELECT lotId, userId, capacity, lotAddress, pricePerHour, lotDescription FROM parkingLots WHERE userId = $2', [userId]));
+  
+  if (!query.rows.length) {
+    res.status(404).send({
+      status: 'error',
+      error: 'LOT_NOT_FOUND',
+      description: 'lot with specified userId associated does not exist'
+    });
+    return;
+  }
+  
+  // send all lots in response at once
+  res.status(200).send({
+    lots: query.rows
+  });
+}));
+
+/*
+  GET REQUEST for lot
 */
 router.get('/:lotId', wrapAsync(async (req, res) => {
   let lotId = req.params.lotId;
