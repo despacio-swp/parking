@@ -35,7 +35,6 @@ router.get('/all', wrapAsync(async (req, res) => {
 */
 router.get('/user/:userId', wrapAsync(async (req, res) => {
 
-  let lotId = req.params.lotId;
   let userId = req.params.userId;
   let query = (await db.query('SELECT lotId, userId, capacity, lotAddress, pricePerHour, lotDescription FROM parkingLots WHERE userId = $2', [userId]));
   
