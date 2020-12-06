@@ -46,13 +46,14 @@ router.get('/:lotId', wrapAsync(async (req, res) => {
     return;
   }
   let lot = query.rows[0];
+  console.log(query.rows);
   res.status(200).send({
     status: 'ok',
-    userId: lot.userId,
+    userId: lot.userid,
     capacity: lot.capacity,
-    lotAddress: lot.lotAddress,
-    pricePerHour: lot.pricePerHour,
-    lotDescription: lot.lotDescription
+    lotAddress: lot.lotaddress,
+    pricePerHour: lot.priceperhour,
+    lotDescription: lot.lotdescription
   });
 }));
 

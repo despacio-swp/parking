@@ -61,10 +61,10 @@ export default function Search(this: any) {
     }
   }
 
-  function lotSelector(id: string, address: string, capacity: number) {
+  function lotSelector(lotid: string, address: string, capacity: number) {
     let occ = 0;
     for(let i = 0; i < occupancyList.length; i++) {
-      if(occupancyList[i].id == id) {
+      if(occupancyList[i].id == lotid) {
         occ = occupancyList[i].occupancy;
       }
     }
@@ -77,7 +77,7 @@ export default function Search(this: any) {
               secondary={'Capacity: ' + occ + '/' + capacity}
             />
             <ListItemSecondaryAction>
-              <Link href="/lotProfile" passHref>
+              <Link href={"/lotProfile/" + lotid} passHref>
                 <Button variant="contained" color="primary">
                   Select
         </Button>
