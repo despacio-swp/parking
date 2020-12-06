@@ -77,7 +77,7 @@ export default function profile() {
         <Typography variant="h6" align="left">Available Space: {lotCount}/{lotData.capacity}</Typography>
         <Typography variant="h6" align="left">Description: {lotData.description}</Typography>
         <Typography variant="h6" align="left">Price Per Hour: ${lotData.price}/hr</Typography>
-        <Button variant="contained" onChange={park()}>Park Here</Button>
+        <Button variant="contained">Park Here</Button>
       </Grid>
     </Paper>
   </React.Fragment>;
