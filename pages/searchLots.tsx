@@ -102,7 +102,7 @@ export default function Search(this: any) {
       }
       return elements;
     }
-    return <div className={styles.oops}>Nothing to see here ¯\_ (ツ)_/¯</div>
+    return <div className={styles.oops}>Nothing to see here ¯\_(ツ)_/¯</div>
   }
 
   function handleSort(elements: JSX.Element[]) {
