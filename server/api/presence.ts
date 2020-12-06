@@ -6,6 +6,7 @@ import { v4 as generateUuid } from 'uuid';
 import db from '../db';
 import log from '../logger';
 import { wrapAsync } from '../common';
+import { validateSession } from './accounts';
 
 let router = express.Router(); // eslint-disable-line new-cap
 let jsonParse = bodyParser.json();
@@ -27,8 +28,21 @@ router.get('/lots/all', wrapAsync(async (req, res) => {
   });
 }));
 
-router.get('/lots/current', wrapAsync(async (res, req) => {
-
+router.get('/lots/current', validateSession, wrapAsync(async (req, res) => {
+  if (!req.session) {
+    res.status(404).send({
+      status: 'error',
+      error: 'NO_SESSION',
+      description: 'session does not exist'
+    });
+    return;
+  }
+  let lot = (await db.query('SELECT lotid FROM lotoccupancy LEFT JOIN vehicles ON lotoccupancy.plateid = vehicles.plateid WHERE userid = $1', [req.session.userId])).rows[0];
+  res.status(200).send({
+    status: 'ok',
+    userId: req.session.userId,
+    lotId: lot.lotid
+  });
 }));
 
 // Return list of plate IDs from a single lot

@@ -15,6 +15,7 @@ import axios from 'axios';
 export default function Search(this: any) {
   let [query, setQuery] = React.useState('');
   let [value, setValue] = React.useState('address');
+  let [sort, setSort] = React.useState('asc');
   let [lotEntries, setLotEntries] = useState<JSX.Element[]>([<p>Loading</p>]); // stupid placeholder
   let idList: string[] = [];
   let occupancyList: { id: string; occupancy: number; }[] = [];
@@ -91,11 +92,17 @@ export default function Search(this: any) {
 
   async function renderEntries() {
     let vals = await getEntries();
-    await getOccupancy();
-    let filtered = vals.filter((lot: any) => lot.lotaddress.includes(query));
-    let elements = filtered.map((lot: any) => lotSelector(lot.lotid, lot.lotaddress, lot.capacity));
-    handleSort(elements);
-    return elements;
+    if(vals) {
+      await getOccupancy();
+      let filtered = vals.filter((lot: any) => lot.lotaddress.includes(query));
+      let elements = filtered.map((lot: any) => lotSelector(lot.lotid, lot.lotaddress, lot.capacity));
+      handleSort(elements);
+      if((value=='address' && sort=='dsc') || (value=='capacity' && sort=='asc')) {
+        elements.reverse();
+      }
+      return elements;
+    }
+    return <div>Nothing to see here ¯\_ (ツ)_/¯</div>
   }
 
   function handleSort(elements: JSX.Element[]) {
@@ -126,7 +133,7 @@ export default function Search(this: any) {
     (async () => {
       setLotEntries(await renderEntries());
     })();
-  }, [value, query]);
+  }, [value, query, sort]);
 
 
 
@@ -142,6 +149,11 @@ export default function Search(this: any) {
         ): void => setValue(ev.target.value)}>
           <FormControlLabel className={styles.radioSort} value="address" control={<Radio color="primary" />} label="Address" />
           <FormControlLabel className={styles.radioSort} value="capacity" control={<Radio color="primary" />} label="Capacity" />
+        </RadioGroup>
+        <RadioGroup aria-label="filter" color="#556cd6" name="filter" value={sort} onChange={(ev: React.ChangeEvent<HTMLInputElement>,
+        ): void => setSort(ev.target.value)}>
+          <FormControlLabel className={styles.radioSort} value="asc" control={<Radio color="primary" />} label="Asc" />
+          <FormControlLabel className={styles.radioSort} value="dsc" control={<Radio color="primary" />} label="Desc" />
         </RadioGroup>
       </FormControl>
     </div>
