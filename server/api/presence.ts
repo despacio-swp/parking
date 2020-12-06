@@ -50,25 +50,6 @@ router.get('/lots/:lotId', wrapAsync(async (req, res) => {
   });
 }));
 
-// Return list of plate IDs from a single lot
-router.get('/lots/:lotId/occupancy', wrapAsync(async (req, res) => {
-  let lotId = req.params.lotId;
-  let query = await db.query('SELECT COALESCE(COUNT(plateId), 0) FROM lotOccupancy WHERE lotId = $1', [lotId]);
-  if (!query.rows.length) {
-    res.status(404).send({
-      status: 'error',
-      error: 'LOT_NOT_FOUND',
-      description: 'lot does not exist'
-    });
-    return;
-  }
-  //trying to send all vehicles at once
-  res.status(200).send({
-    status: 'ok',
-    plates: query.rows
-  });
-}));
-
 // Post yourself in current lot
 router.post('/lots/:lotId/:plateId', wrapAsync(async (req, res) => {
   let lotId = req.params.lotId;

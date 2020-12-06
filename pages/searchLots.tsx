@@ -1,13 +1,11 @@
-import React, { ReactElement, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
-import { useRouter } from 'next/router';
 import SearchBar from 'material-ui-search-bar';
 import AppMenu from '../components/AppMenu';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
-import { Paper, Box, TextField, Typography, Grid, FormGroup, FormControlLabel, RadioGroup, Radio, FormControl, FormLabel } from '@material-ui/core';
-import { shadows } from '@material-ui/system';
+import { Box, FormControlLabel, RadioGroup, Radio, FormControl, FormLabel } from '@material-ui/core';
 import styles from './searchLots.module.scss';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import Button from '@material-ui/core/Button';
@@ -15,16 +13,23 @@ import Link from 'next/link';
 import axios from 'axios';
 
 export default function Search(this: any) {
-  let [query, setQuery] = React.useState({ query: '' });
+  let [query, setQuery] = React.useState('');
   let [value, setValue] = React.useState('address');
   let [lotEntries, setLotEntries] = useState<JSX.Element[]>([<p>Loading</p>]); // stupid placeholder
-  let [lotOccupancy, setOccupancy] = useState<number[]>([0]);
+  let idList: string[] = [];
+  let occupancyList: { id: string; occupancy: number; }[] = [];
 
 
   async function getEntries() {
     let response;
     try {
       response = await axios.get('/api/v1/lots/all');
+      response.data.lots.forEach((lot: any) => {
+        idList.push(lot.lotid);
+      });
+      idList.forEach((id: string) => {
+        occupancyList.push({id: id, occupancy: 0});
+      })
     }
     catch (err) {
       if (err.response) response = err.response;
@@ -39,26 +44,36 @@ export default function Search(this: any) {
   async function getOccupancy() {
     let response;
     try {
-      response = await axios.get('/api/v1/presence/');
+      response = await axios.get('/api/v1/presence/lots/all');
+      let count = 0;
+      response.data.lots.forEach((lot: any) => {
+        occupancyList.forEach((l: any) => {
+            if(l.id === lot.lotid) {
+              l.occupancy++;
+            }
+        });
+      });
+      return count;
     }
     catch (err) {
-      if (err.response) response = err.response;
-      else throw err;
+      throw err;
     }
-    if (response.data === null) {
-      console.log('Error!');
-    }
-    return response.data;
   }
 
-  function lotSelector(address: string, capacity: number) {
-    return (
-      <React.Fragment key={ address + ' | ' + capacity.toString()}>
+  function lotSelector(id: string, address: string, capacity: number) {
+    let occ = 0;
+    for(let i = 0; i < occupancyList.length; i++) {
+      if(occupancyList[i].id == id) {
+        occ = occupancyList[i].occupancy;
+      }
+    }
+    let frag = (
+      <React.Fragment key={address + ' | ' + capacity.toString()}>
         <Box className={styles.searchBox} boxShadow={3}>
           <ListItem>
             <ListItemText
               primary={'Address: ' + address}
-              secondary={'Capacity: ' + capacity}
+              secondary={'Capacity: ' + occ + '/' + capacity}
             />
             <ListItemSecondaryAction>
               <Link href="/lotProfile" passHref>
@@ -71,33 +86,36 @@ export default function Search(this: any) {
         </Box>
       </React.Fragment>
     )
+    return frag
   }
 
   async function renderEntries() {
     let vals = await getEntries();
-    let elements = vals.map((lot: any) => lotSelector(lot.lotaddress, lot.capacity));
+    await getOccupancy();
+    let filtered = vals.filter((lot: any) => lot.lotaddress.includes(query));
+    let elements = filtered.map((lot: any) => lotSelector(lot.lotid, lot.lotaddress, lot.capacity));
     handleSort(elements);
     return elements;
   }
 
   function handleSort(elements: JSX.Element[]) {
-    if(value == 'address'){
-      elements.sort(function(a, b) {
+    if (value == 'address') {
+      elements.sort(function (a, b) {
         let keyA = a.key!.toString();
         let keyB = b.key!.toString();
         let addA = keyA.substring(0, keyA.indexOf(" | "));
         let addB = keyB.substring(0, keyB.indexOf(" | "));
         return addA > addB ? 1 : -1;
-    })
+      })
     } else {
-      elements.sort(function(a, b) {
+      elements.sort(function (a, b) {
         let keyA = a.key!.toString();
         let keyB = b.key!.toString();
         let capA = parseInt(keyA.substring(keyA.indexOf(" | ")));
         let capB = parseInt(keyB.substring(keyB.indexOf(" | ")));
         return capA - capB;
-    })
-        
+      })
+
     }
     elements.forEach(element => {
       console.log(element.key);
@@ -108,7 +126,7 @@ export default function Search(this: any) {
     (async () => {
       setLotEntries(await renderEntries());
     })();
-  }, [value]);
+  }, [value, query]);
 
 
 
@@ -127,7 +145,7 @@ export default function Search(this: any) {
         </RadioGroup>
       </FormControl>
     </div>
-    <SearchBar className={styles.searchBar} onChange={e => { setQuery({ query: e }) }} onRequestSearch={() => console.log(query)} onCancelSearch={() => setQuery({ query: '' })} />
+    <SearchBar className={styles.searchBar} onChange={e => { setQuery(e) }} onRequestSearch={() => console.log(query)} onCancelSearch={() => setQuery('')} />
     <div>
       <List className={styles.searchResult}>
         {lotEntries}
