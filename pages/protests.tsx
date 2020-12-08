@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import AppMenu from '../components/AppMenu';
 import {Grid, Menu, MenuItem, TextField, Button, IconButton, Fab} from '@material-ui/core';
 import {Card, CardHeader, CardContent, CardActions, Collapse} from '@material-ui/core';
 import {Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions} from '@material-ui/core';
 import {MoreVert, ExpandMore, Add} from '@material-ui/icons';
 import styles from './lots.module.scss';
+import axios from 'axios';
 
 interface Protest {
+    id: string;
     name: string;
     description: string;
     location: string;
@@ -76,6 +78,18 @@ export default function ProtestPage() {
     const [openAddDialog, setOpenAddDialog] = React.useState(false);
     const [openEditDialog, setOpenEditDialog] = React.useState(false);
 
+    useEffect(() => void (async () => {
+        let response = await axios.get('/api/v1/protests/all');
+        console.log('initial fetch', response.data.protests);
+        setProtests(response.data.protests.map((protest: any) => ({
+            id: protest.protestId,
+            name: protest.protestName,
+            description: protest.protestDescription,
+            location: protest.protestAddress,
+            time: protest.protestDate
+        })));
+    })(), []);
+
     const handleOpenAddDialog = () => {
         setName("");
         setDescription("");
@@ -92,21 +106,35 @@ export default function ProtestPage() {
         setOpenEditDialog(true);
     };
 
-    const handleEdit = (protest: Protest) => {
-        protest.name = name;
-        protest.description = description;
-        protest.location = location;
-        protest.time = time;
+    const handleEdit = async (protest: Protest) => {
+        let response = await axios.put('/api/v1/protests/' + protest.id, { protestName: name, protestAddress: location, protestDate: time, protestDescription: description });
+        let data = response.data;
+        let newData = Object.assign({}, protest, {
+            id: data.protestId,
+            name: data.protestName,
+            description: data.protestDescription,
+            location: data.protestAddress,
+            time: data.protestDate
+        });
+        setProtests([newData, ...protests.filter(item => item !== protest)]);
         setOpenEditDialog(false);
     };
 
-    const handleAdd = (name: string, description: string, location: string, time: string) => {
-        const protest: Protest = {name, description, location, time};
-        setProtests([...protests, protest]);
+    const handleAdd = async (name: string, description: string, location: string, time: string) => {
+        let response = await axios.put('/api/v1/protests/protest', { protestName: name, protestAddress: location, protestDate: time, protestDescription: description });
+        let data = response.data;
+        setProtests([...protests, {
+            id: data.protestId,
+            name: data.protestName,
+            description: data.protestDescription,
+            location: data.protestAddress,
+            time: data.protestDate
+        }]);
         setOpenAddDialog(false);
     };
 
-    const handleDelete = (protest: Protest) => {
+    const handleDelete = async (protest: Protest) => {
+        let response = await axios.delete('/api/v1/protests/' + protest.id);
         setProtests(protests.filter(item => item !== protest));
     };
 
