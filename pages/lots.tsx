@@ -7,6 +7,7 @@ import { MoreVert, ExpandMore, Add } from '@material-ui/icons';
 import styles from './lots.module.scss';
 import axios from 'axios';
 
+
 /* eslint-disable @typescript-eslint/indent */
 /* eslint-disable max-len */
 

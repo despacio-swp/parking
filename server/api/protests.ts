@@ -65,10 +65,12 @@ let createProtestSchema = ajv.compile({
   type: 'object',
   properties: {
     protestDate: { type: 'string' },
+    protestName: {type: 'string'},
+    email: {type: 'string'},
     protestAddress: { type: 'string' },
     protestDescription: {type: 'string'}
   },
-  required: ['protestDate', 'protestAddress']
+  required: ['protestDate', 'protestName', 'email','protestAddress']
 });
 
 /*
@@ -178,7 +180,7 @@ router.post('/protest', validateSession, wrapAsync(async (req, res) => {
 
   let {protestDate, protestName, email, protestAddress, protestDescription} = req.body;
   
-  let result = await db.query('INSERT INTO protests (protestId, userId, protestDate, protestAddress, protestDescription, tags) ' +
+  let result = await db.query('INSERT INTO protests (protestId, userId, protestDate, protestName, email, protestAddress, protestDescription) ' +
     'VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT DO NOTHING', [protestId, userId, protestDate, protestName, email, protestAddress, protestDescription]);
   if (!result.rowCount) {
     res.status(409).send({
