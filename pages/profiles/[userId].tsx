@@ -2,14 +2,14 @@ import React, { useEffect } from 'react';
 import Head from 'next/head';
 import axios from 'axios';
 import AppMenu from '../../components/AppMenu';
-import { Paper, Box, TextField, Typography, Grid, makeStyles, Dialog, DialogTitle, DialogActions, DialogContent, DialogContentText, Button } from '@material-ui/core';
+import { Paper, TextField, Typography, Grid, makeStyles, Dialog, DialogTitle, DialogActions, DialogContent, DialogContentText, Button } from '@material-ui/core';
 import styles from './userProfile.module.scss';
 import { Avatar, Fab } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
 import Add from '@material-ui/icons/Add';
 import { useRouter } from 'next/router';
 import accountsService from '../../client/accountsService';
-import { stringify } from 'querystring';
+import { observer } from 'mobx-react';
 
 /* eslint-disable max-len */
 
@@ -20,8 +20,7 @@ const useStyle = makeStyles(theme => ({
   }
 }));
 
-
-export default function profile() {
+function profile() {
   let router = useRouter();
   let userId: string | null = router.query.userId as string;
   if (userId === 'self') userId = accountsService.userId;
@@ -143,11 +142,6 @@ export default function profile() {
           <Typography variant="h6" align="left">Email: {email}</Typography>
           <Typography variant="h6" align="left">Car Information</Typography>
           {platesList}
-          {/*
-          <Typography variant="h6" align="left">Make: {make} </Typography>
-          <Typography variant="h6" align="left">Model: {model}</Typography>
-          <Typography variant="h6" align="left">Plate ID: {plate}</Typography>
-          */}
         </Grid>
       </Paper>
       <Fab className={styles.fab} onClick={() => setOpen(true)} color="secondary" aria-label="edit">
@@ -160,11 +154,6 @@ export default function profile() {
           <TextField value={firstNameTemp} label="First Name" variant="outlined" margin="normal" fullWidth required onChange={event => setFirstNameTemp(event.target.value)}>{firstName}</TextField>
           <TextField value={lastNameTemp} label="Last Name" variant="outlined" margin="normal" fullWidth required onChange={event => setLastNameTemp(event.target.value)}>{lastName}</TextField>
           <TextField value={emailTemp} label="Email" variant="outlined" margin="normal" fullWidth required onChange={event => setEmailTemp(event.target.value)}>{email}</TextField>
-          {/*
-          <TextField value={makeTemp} label="Make" variant="outlined" margin="normal" fullWidth required onChange={event => setMakeTemp(event.target.value)}>{make}</TextField>
-          <TextField value={modelTemp} label="Model" variant="outlined" margin="normal" fullWidth required onChange={event => setModelTemp(event.target.value)}>{model}</TextField>
-          <TextField value={plateTemp} label="Model" variant="outlined" margin="normal" fullWidth required onChange={event => setPlateTemp(event.target.value)}>{plate}</TextField>
-          */}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => handleClose()}> Cancel </Button>
@@ -198,3 +187,5 @@ export default function profile() {
     {contents}
   </React.Fragment>;
 }
+
+export default observer(profile);

@@ -3,13 +3,11 @@ import AppMenu from '../components/AppMenu';
 import { Grid, Menu, MenuItem, TextField, Button, IconButton, Fab, Typography } from '@material-ui/core';
 import { Card, CardHeader, CardContent, CardActions, Collapse, List, ListItem, ListItemText } from '@material-ui/core';
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@material-ui/core';
-import { MoreVert, ExpandMore, Add } from '@material-ui/icons';
+import MoreVert from '@material-ui/icons/MoreVert';
+import ExpandMore from '@material-ui/icons/ExpandMore';
+import Add from '@material-ui/icons/Add';
 import styles from './lots.module.scss';
 import axios from 'axios';
-
-
-/* eslint-disable @typescript-eslint/indent */
-/* eslint-disable max-len */
 
 interface Lot {
     id: number;
@@ -29,6 +27,10 @@ function LotCard(props: any) {
     const [occupants, setOccupants] = React.useState<Occupant[]>([]);
     const [expanded, setExpanded] = React.useState(false);
     const [anchorEl, setAnchorEl] = React.useState(null);
+
+    useEffect(() => void (async () => {
+        
+    })(), []);
 
     const handleOpenMenu = (event: any) => {
         setAnchorEl(event.currentTarget);
@@ -97,7 +99,6 @@ export default function LotPage() {
 
     useEffect(() => void (async () => {
         let response = await axios.get('/api/v1/lots/all');
-        console.log('initial fetch', response.data.lots);
         setLots(response.data.lots.map((lot: any) => ({
             id: lot.lotid,
             name: lot.lotdescription,
@@ -126,7 +127,6 @@ export default function LotPage() {
 
     const handleEdit = async (lot: Lot) => {
         let response = await axios.put('/api/v1/lots/' + lot.id, { capacity: +capacity, lotAddress: location, pricePerHour: +price, lotDescription: name });
-        // TODO: error handling if necessary or loading state
         let data = response.data;
         let newData = Object.assign({}, lot, {
             name: data.lotDescription,
@@ -141,7 +141,6 @@ export default function LotPage() {
     const handleAdd = async (name: string, location: string, capacity: number, price: number) => {
         let response = await axios.post('/api/v1/lots/lot', { capacity: capacity, lotAddress: location, pricePerHour: price, lotDescription: name });
         let data = response.data;
-        console.log('add', data);
         setLots([...lots, {
             id: data.lotId,
             name: data.lotDescription,
@@ -154,7 +153,6 @@ export default function LotPage() {
     };
 
     const handleDelete = async (lot: Lot) => {
-        console.log('delete', lot);
         let response = await axios.delete('/api/v1/lots/' + lot.id);
         setLots(lots.filter(item => item !== lot));
     };
@@ -276,4 +274,4 @@ export default function LotPage() {
             </Dialog>
         </React.Fragment>
     );
-}
+};

@@ -21,17 +21,16 @@ router.get('/', (_req, res) => res.send({ status: 'ok' }));
 // TODO: use ajv more
 
 /*
-	  GET REQUEST for All Protests
-	*/
-	router.get('/all', wrapAsync(async (req, res) => {
-	  let protests = await db.query('SELECT protestId, protestDate, protestName, email, protestAddress, protestDescription FROM protests');
-	  
-	  //trying to send all protests at once
-	  res.status(200).send({
-	    protests: protests.rows
-	  });
-	}));
+  GET REQUEST for All Protests
+*/
+router.get('/all', wrapAsync(async (req, res) => {
+  let protests = await db.query('SELECT protestId, protestDate, protestName, email, protestAddress, protestDescription FROM protests');
 
+  // trying to send all protests at once
+  res.status(200).send({
+    protests: protests.rows
+  });
+}));
 
 /*
   GET REQUEST
