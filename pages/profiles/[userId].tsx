@@ -2,7 +2,10 @@ import React, { useEffect } from 'react';
 import Head from 'next/head';
 import axios from 'axios';
 import AppMenu from '../../components/AppMenu';
-import { Paper, TextField, Typography, Grid, makeStyles, Dialog, DialogTitle, DialogActions, DialogContent, DialogContentText, Button } from '@material-ui/core';
+import {
+  Paper, TextField, Typography, Grid, makeStyles, Dialog, DialogTitle,
+  DialogActions, DialogContent, DialogContentText, Button, IconButton
+} from '@material-ui/core';
 import styles from './userProfile.module.scss';
 import { Avatar, Fab } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
@@ -10,6 +13,7 @@ import Add from '@material-ui/icons/Add';
 import { useRouter } from 'next/router';
 import accountsService from '../../client/accountsService';
 import { observer } from 'mobx-react';
+import Delete from '@material-ui/icons/Delete';
 
 /* eslint-disable max-len */
 
@@ -37,7 +41,7 @@ function profile() {
   let [plates, setPlates] = React.useState<string[]>([]);
 
   useEffect(() => {
-    if (userId === null) return;
+    if (userId === null || userId === undefined) return;
     setLoading(true);
     (async () => {
       let response;
@@ -108,6 +112,11 @@ function profile() {
 
   const classes = useStyle();
 
+  const handleRemoveItem = async (target: string) => {
+    let response = await axios.delete('/api/v1/profiles/self/vehicles/' + target);
+    setPlates(plates.filter(item => target !== item));
+  };
+
   let platesList: JSX.Element;
   if (!plates.length) {
     platesList = <p>You have no vehicles!</p>;
@@ -115,7 +124,11 @@ function profile() {
     platesList = <>
       {plates.map(plate => (
         // change this later if it looks ugly i guess
-        <p key={plate}><b>License plate:</b> {plate}</p>
+        <p key={plate}><b>License plate:</b> {plate} <span>
+          <IconButton onClick={() => handleRemoveItem(plate)}>
+            <Delete/>
+          </IconButton>
+        </span></p>
       ))}
     </>;
   }
@@ -144,7 +157,7 @@ function profile() {
           {platesList}
         </Grid>
       </Paper>
-      <Fab className={styles.fab} onClick={() => setOpen(true)} color="secondary" aria-label="edit">
+      <Fab className={styles.fab} onClick={() => setOpen(true)} color="primary" aria-label="edit">
         <EditIcon />
       </Fab>
       <Dialog open={open} onClose={() => setOpen(false)}>
@@ -162,13 +175,13 @@ function profile() {
           </Button>
         </DialogActions>
       </Dialog>
-      <Fab className={styles.fab2} onClick={() => setOpenAdd(true)} color="secondary" aria-label="edit">
+      <Fab className={styles.fab2} onClick={() => setOpenAdd(true)} color="primary" aria-label="edit">
         <Add />
       </Fab>
       <Dialog open={openAdd} onClose={() => setOpenAdd(false)}>
         <DialogTitle> Add Vehicle License Plate </DialogTitle>
         <DialogContent>
-          <TextField value={plateName} label="License Plate" variant="outlined" margin="normal" fullWidth required onChange={event => setPlate(event.target.value)}>{plateName}</TextField>
+          <TextField  label="License Plate" variant="outlined" margin="normal" fullWidth required onChange={event => setPlate(event.target.value)}></TextField>
           <Button onClick={() => handleCloseAdd()}> Cancel </Button>
           <Button onClick={() => addPlate(plateName)}>
             Add
