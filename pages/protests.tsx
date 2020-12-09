@@ -13,6 +13,7 @@ interface Protest {
     description: string;
     location: string;
     time: string;
+    email: string;
 }
 
 function ProtestCard(props: any) {
@@ -75,18 +76,19 @@ export default function ProtestPage() {
     const [description, setDescription] = React.useState("");
     const [location, setLocation] = React.useState("");
     const [time, setTime] = React.useState("");
+    const [email, setEmail] = React.useState("");
     const [openAddDialog, setOpenAddDialog] = React.useState(false);
     const [openEditDialog, setOpenEditDialog] = React.useState(false);
 
     useEffect(() => void (async () => {
         let response = await axios.get('/api/v1/protests/all');
-        console.log('initial fetch', response.data.protests);
         setProtests(response.data.protests.map((protest: any) => ({
-            id: protest.protestId,
-            name: protest.protestName,
-            description: protest.protestDescription,
-            location: protest.protestAddress,
-            time: protest.protestDate
+            id: protest.protestid,
+            name: protest.protestname,
+            description: protest.protestdescription,
+            location: protest.protestaddress,
+            time: protest.protestdate,
+            email: protest.email
         })));
     })(), []);
 
@@ -95,6 +97,7 @@ export default function ProtestPage() {
         setDescription("");
         setLocation("");
         setTime("");
+        setEmail("");
         setOpenAddDialog(true);
     };
 
@@ -103,32 +106,35 @@ export default function ProtestPage() {
         setDescription(protest.description);
         setLocation(protest.location);
         setTime(protest.time);
+        setEmail(protest.email);
         setOpenEditDialog(true);
     };
 
     const handleEdit = async (protest: Protest) => {
-        let response = await axios.put('/api/v1/protests/' + protest.id, { protestName: name, protestAddress: location, protestDate: time, protestDescription: description });
+        let response = await axios.put('/api/v1/protests/' + protest.id, { protestDate: time, protestName: name, email: email, protestAddress: location, protestDescription: description });
         let data = response.data;
         let newData = Object.assign({}, protest, {
-            id: data.protestId,
             name: data.protestName,
             description: data.protestDescription,
             location: data.protestAddress,
-            time: data.protestDate
+            time: data.protestDate,
+            email: data.email
         });
         setProtests([newData, ...protests.filter(item => item !== protest)]);
         setOpenEditDialog(false);
     };
 
-    const handleAdd = async (name: string, description: string, location: string, time: string) => {
-        let response = await axios.put('/api/v1/protests/protest', { protestName: name, protestAddress: location, protestDate: time, protestDescription: description });
+    const handleAdd = async (name: string, description: string, location: string, time: string, email: string) => {
+        let response = await axios.post('/api/v1/protests/protest', { protestDate: time, protestName: name, email: email, protestAddress: location, protestDescription: description });
         let data = response.data;
+        console.log(data);
         setProtests([...protests, {
             id: data.protestId,
             name: data.protestName,
             description: data.protestDescription,
             location: data.protestAddress,
-            time: data.protestDate
+            time: data.protestDate,
+            email: data.email
         }]);
         setOpenAddDialog(false);
     };
@@ -146,7 +152,7 @@ export default function ProtestPage() {
         return error(value) ? "Empty field!" : "";
     };
 
-    const anyError = name === "" || description === "" || location === "" || time === "";
+    const anyError = name === "" || description === "" || location === "" || time === "" || email === "";
 
     return (
         <React.Fragment>
@@ -181,11 +187,17 @@ export default function ProtestPage() {
                                 helperText={errorText(location)}
                                 placeholder={protest.location}
                             />
-                             <TextField value={time} label="Time" margin="normal" fullWidth 
+                            <TextField value={time} label="Time" margin="normal" fullWidth 
                                 onChange={event => setTime(event.target.value)} 
                                 error={error(time)}
                                 helperText={errorText(time)}
                                 placeholder={protest.time}
+                            />
+                            <TextField value={email} label="Email" margin="normal" fullWidth 
+                                onChange={event => setEmail(event.target.value)} 
+                                error={error(email)}
+                                helperText={errorText(email)}
+                                placeholder={protest.email}
                             />
                         </DialogContent>
                         <DialogActions>
@@ -222,10 +234,15 @@ export default function ProtestPage() {
                         error={error(time)}
                         helperText={errorText(time)}
                     />
+                    <TextField value={email} label="Email" margin="normal" fullWidth 
+                        onChange={event => setEmail(event.target.value)}
+                        error={error(email)}
+                        helperText={errorText(email)}
+                    />
                 </DialogContent>
                 <DialogActions>
                     <Button color="primary" onClick={() => setOpenAddDialog(false)}> Cancel </Button>
-                    <Button disabled={anyError} color="primary" onClick={() => handleAdd(name, description, location, time)}> Create </Button>
+                    <Button disabled={anyError} color="primary" onClick={() => handleAdd(name, description, location, time, email)}> Create </Button>
                 </DialogActions>
             </Dialog>
         </React.Fragment>

@@ -97,7 +97,6 @@ export default function LotPage() {
 
     useEffect(() => void (async () => {
         let response = await axios.get('/api/v1/lots/all');
-        console.log('initial fetch', response.data.lots);
         setLots(response.data.lots.map((lot: any) => ({
             id: lot.lotid,
             name: lot.lotdescription,
