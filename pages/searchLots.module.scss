@@ -25,6 +25,11 @@
     width: 500px;
 }
 
-FormControlLabel {
-    
+.radioSort :checked {
+    color: primary;
+}
+
+.oops {
+    width: auto;
+    margin: auto;
 }
