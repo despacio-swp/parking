@@ -19,21 +19,14 @@ const AppMenu: React.FC<{ page: string }> = ({ page }) => {
     setOpen(open);
   };
   const pages = [
-    ['login', 'Login'],
-    ['register', 'Register'], 
+    //['login', 'Login'],
+    //['register', 'Register'], 
     ['userProfile', 'Profile'], 
     ['searchLots', 'Search Lots'], 
     ['lotProfile', 'Current Lot'],
     ['lots', 'My Lots'], 
     ['protests', 'My Protests']
   ];
-
-  const divider = (divide: boolean) => {
-    if (divide) {
-      return <Divider />;
-    }
-    return;
-  };
 
   return (
     <React.Fragment>
@@ -63,7 +56,7 @@ const AppMenu: React.FC<{ page: string }> = ({ page }) => {
                   <ListItemText primary={text[1]} />
                 </ListItem>
               </Link>
-              {divider(text[0] === 'lotProfile')}
+              {text[0] === 'lotProfile' ? <Divider /> : null}
             </React.Fragment>
           ))}
         </List>
