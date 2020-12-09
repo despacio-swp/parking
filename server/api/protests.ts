@@ -100,12 +100,12 @@ router.put('/:protestId',validateSession, wrapAsync(async (req, res) => {
   let protestId = req.params.protestId;
   let userId = req.session.userId;
 
-  let protestDate = req.params.protestDate;
-  let protestName = req.params.protestName;
-  let email = req.params.email;
-  let protestAddress = req.params.protestAddress;
+  let protestDate = req.body.protestDate;
+  let protestName = req.body.protestName;
+  let email = req.body.email;
+  let protestAddress = req.body.protestAddress;
   // possible null parameters
-  let protestDescription = req.params.protestDescription;
+  let protestDescription = req.body.protestDescription;
 
   let protest = (await db.query('UPDATE protests SET protestDate = $3, protestName = $4, email = $5, protestAddress = $6, protestDescription = $7 WHERE protestId = $1 AND userId = $2' , 
   [protestId,userId,protestDate,protestName,email, protestAddress,protestDescription]));
