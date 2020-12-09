@@ -18,6 +18,15 @@ router.use(cookieParse);
 
 router.get('/', (_req, res) => res.send({ status: 'ok' }));
 
+router.get('/users/all', wrapAsync(async (req, res) => {
+  let lots = await db.query('SELECT userId, lotoccupancy.plateid FROM lotOccupancy LEFT JOIN vehicles ON lotoccupancy.plateid = vehicles.plateid');
+
+  //trying to send all lots at once
+  res.status(200).send({
+    lots: lots.rows
+  });
+}));
+
 // Return list of plate IDs from 
 router.get('/lots/all', wrapAsync(async (req, res) => {
   let lots = await db.query('SELECT lotId, plateId FROM lotOccupancy ORDER BY lotId');
@@ -37,11 +46,10 @@ router.get('/lots/current', validateSession, wrapAsync(async (req, res) => {
     });
     return;
   }
-  let lot = (await db.query('SELECT lotid FROM lotoccupancy LEFT JOIN vehicles ON lotoccupancy.plateid = vehicles.plateid WHERE userid = $1', [req.session.userId])).rows[0];
+  let lot = (await db.query('SELECT lotid, lotoccupancy.plateid FROM lotoccupancy LEFT JOIN vehicles ON lotoccupancy.plateid = vehicles.plateid WHERE userid = $1', [req.session.userId]));
   res.status(200).send({
     status: 'ok',
-    userId: req.session.userId,
-    lotId: lot.lotid
+    lots: lot.rows
   });
 }));
 
@@ -86,7 +94,7 @@ router.post('/lots/:lotId/:plateId', wrapAsync(async (req, res) => {
   }
 }));
 
-// Post yourself in current lot
+// Delete yourself in current lot
 router.delete('/lots/:lotId/:plateId', wrapAsync(async (req, res) => {
   let lotId = req.params.lotId;
   let plateId = req.params.plateId;

@@ -16,7 +16,7 @@ CREATE TABLE sessions (
 
 CREATE TABLE vehicles (
     plateId text PRIMARY KEY,
-    userId text REFERENCES accounts (userId) NOT NULL
+    userId text REFERENCES accounts (userId) NOT NULL,
 );
 
 CREATE TABLE paymentLinks (
@@ -54,5 +54,6 @@ CREATE TABLE links (
 
 CREATE TABLE lotOccupancy (
     plateId text REFERENCES vehicles (plateId) NOT NULL,
-    lotId text REFERENCES parkingLots (lotId) NOT NULL
+    lotId text REFERENCES parkingLots (lotId) NOT NULL,
+    UNIQUE (plateId, lotId)
 );

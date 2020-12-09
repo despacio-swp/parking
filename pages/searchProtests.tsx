@@ -14,23 +14,21 @@ import axios from 'axios';
 
 export default function Search(this: any) {
   let [query, setQuery] = React.useState('');
-  let [value, setValue] = React.useState('address');
+  let [value, setValue] = React.useState('name');
   let [sort, setSort] = React.useState('asc');
-  let [lotEntries, setLotEntries] = useState<JSX.Element[]>([<p>Loading</p>]); // stupid placeholder
+  let [protestEntries, setProtestEntries] = useState<JSX.Element[]>([<p>Loading</p>]); // stupid placeholder
   let idList: string[] = [];
-  let occupancyList: { id: string; occupancy: number; }[] = [];
+  let protestList: { protestId: string; protestName: string; protestAddress: string; }[] = [];
 
 
   async function getEntries() {
     let response;
     try {
-      response = await axios.get('/api/v1/lots/all');
-      response.data.lots.forEach((lot: any) => {
-        idList.push(lot.lotid);
+      response = await axios.get('/api/v1/protests/all');
+      response.data.protests.forEach((protest: any) => {
+        idList.push(protest.protestId);
+        protestList.push({ protestId: protest.protestId, protestName: protest.protestName, protestAddress: protest.protestAddress });
       });
-      idList.forEach((id: string) => {
-        occupancyList.push({id: id, occupancy: 0});
-      })
     }
     catch (err) {
       if (err.response) response = err.response;
@@ -39,45 +37,20 @@ export default function Search(this: any) {
     if (response.data === null) {
       console.log('Error!');
     }
-    return response.data.lots;
+    return response.data.protests;
   }
 
-  async function getOccupancy() {
-    let response;
-    try {
-      response = await axios.get('/api/v1/presence/lots/all');
-      let count = 0;
-      response.data.lots.forEach((lot: any) => {
-        occupancyList.forEach((l: any) => {
-            if(l.id === lot.lotid) {
-              l.occupancy++;
-            }
-        });
-      });
-      return count;
-    }
-    catch (err) {
-      throw err;
-    }
-  }
-
-  function lotSelector(lotid: string, address: string, capacity: number) {
-    let occ = 0;
-    for(let i = 0; i < occupancyList.length; i++) {
-      if(occupancyList[i].id == lotid) {
-        occ = occupancyList[i].occupancy;
-      }
-    }
+  function protestSelector(protestId: string, name: string, address: string) {
     let frag = (
-      <React.Fragment key={address + ' | ' + capacity.toString()}>
+      <React.Fragment key={name + ' | ' + address}>
         <Box className={styles.searchBox} boxShadow={3}>
           <ListItem>
             <ListItemText
-              primary={'Address: ' + address}
-              secondary={'Capacity: ' + occ + '/' + capacity}
+              primary={'Name: ' + name}
+              secondary={'Location: ' + address}
             />
             <ListItemSecondaryAction>
-              <Link href={"/lotProfile/" + lotid} passHref>
+              <Link href={"/protsetProfile/" + protestId} passHref>
                 <Button variant="contained" color="primary">
                   Select
         </Button>
@@ -92,39 +65,39 @@ export default function Search(this: any) {
 
   async function renderEntries() {
     let vals = await getEntries();
-    if(vals) {
-      await getOccupancy();
-      if(vals.length > 1) {
-        let filtered = vals.filter((lot: any) => lot.lotaddress.includes(query));
-        let elements = filtered.map((lot: any) => lotSelector(lot.lotid, lot.lotaddress, lot.capacity));
+    if (vals !== null) {
+      console.log(vals);
+      if (vals.length > 1) {
+        let filtered = vals.filter((protest: any) => protest.protestaddress.includes(query));
+        let elements = filtered.map((protest: any) => protestSelector(protest.protestid, protest.protestname, protest.protestaddress));
         handleSort(elements);
-        if((value=='address' && sort=='dsc') || (value=='capacity' && sort=='asc')) {
+        if (sort == 'dsc') {
           elements.reverse();
         }
         return elements;
       } else {
-        return vals.map((lot: any) => lotSelector(lot.lotid, lot.lotaddress, lot.capacity));
+        return vals.map((protest: any) => protestSelector(protest.protestid, protest.protestname, protest.protestaddress));
       }
     }
     return <div className={styles.oops}>Nothing to see here ¯\_(ツ)_/¯</div>
   }
 
   function handleSort(elements: JSX.Element[]) {
-    if (value == 'address') {
+    if (value == 'name') {
       elements.sort(function (a, b) {
         let keyA = a.key!.toString();
         let keyB = b.key!.toString();
-        let addA = keyA.substring(0, keyA.indexOf(" | "));
-        let addB = keyB.substring(0, keyB.indexOf(" | "));
-        return addA > addB ? 1 : -1;
+        let nameA = parseInt(keyA.substring(0, keyA.indexOf(" | ")));
+        let nameB = parseInt(keyB.substring(0, keyB.indexOf(" | ")));
+        return nameA > nameB ? 1 : -1;
       })
     } else {
       elements.sort(function (a, b) {
         let keyA = a.key!.toString();
         let keyB = b.key!.toString();
-        let capA = parseInt(keyA.substring(keyA.indexOf(" | ")));
-        let capB = parseInt(keyB.substring(keyB.indexOf(" | ")));
-        return capA - capB;
+        let addA = parseInt(keyA.substring(keyA.indexOf(" | ")));
+        let addB = parseInt(keyB.substring(keyB.indexOf(" | ")));
+        return addA > addB ? 1 : -1;
       })
 
     }
@@ -135,7 +108,7 @@ export default function Search(this: any) {
 
   useEffect(() => {
     (async () => {
-      setLotEntries(await renderEntries());
+      setProtestEntries(await renderEntries());
     })();
   }, [value, query, sort]);
 
@@ -151,8 +124,8 @@ export default function Search(this: any) {
         <FormLabel component="legend">Sort by:</FormLabel>
         <RadioGroup aria-label="filter" color="#556cd6" name="filter" value={value} onChange={(ev: React.ChangeEvent<HTMLInputElement>,
         ): void => setValue(ev.target.value)}>
-          <FormControlLabel className={styles.radioSort} value="address" control={<Radio color="primary" />} label="Address" />
-          <FormControlLabel className={styles.radioSort} value="capacity" control={<Radio color="primary" />} label="Capacity" />
+          <FormControlLabel className={styles.radioSort} value="name" control={<Radio color="primary" />} label="name" />
+          <FormControlLabel className={styles.radioSort} value="address" control={<Radio color="primary" />} label="address" />
         </RadioGroup>
         <RadioGroup aria-label="filter" color="#556cd6" name="filter" value={sort} onChange={(ev: React.ChangeEvent<HTMLInputElement>,
         ): void => setSort(ev.target.value)}>
@@ -164,7 +137,7 @@ export default function Search(this: any) {
     <SearchBar className={styles.searchBar} onChange={e => { setQuery(e) }} onRequestSearch={() => console.log(query)} onCancelSearch={() => setQuery('')} />
     <div>
       <List className={styles.searchResult}>
-        {lotEntries}
+        {protestEntries}
       </List>
     </div>
   </React.Fragment>;
