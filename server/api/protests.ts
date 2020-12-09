@@ -21,17 +21,16 @@ router.get('/', (_req, res) => res.send({ status: 'ok' }));
 // TODO: use ajv more
 
 /*
-	  GET REQUEST for All Protests
-	*/
-	router.get('/all', wrapAsync(async (req, res) => {
-	  let protests = await db.query('SELECT protestId, protestDate, protestName, email, protestAddress, protestDescription FROM protests');
-	  
-	  //trying to send all protests at once
-	  res.status(200).send({
-	    protests: protests.rows
-	  });
-	}));
+  GET REQUEST for All Protests
+*/
+router.get('/all', wrapAsync(async (req, res) => {
+  let protests = await db.query('SELECT protestId, protestDate, protestName, email, protestAddress, protestDescription FROM protests');
 
+  // trying to send all protests at once
+  res.status(200).send({
+    protests: protests.rows
+  });
+}));
 
 /*
   GET REQUEST
@@ -65,10 +64,12 @@ let createProtestSchema = ajv.compile({
   type: 'object',
   properties: {
     protestDate: { type: 'string' },
+    protestName: {type: 'string'},
+    email: {type: 'string'},
     protestAddress: { type: 'string' },
     protestDescription: {type: 'string'}
   },
-  required: ['protestDate', 'protestAddress']
+  required: ['protestDate', 'protestName', 'email','protestAddress']
 });
 
 /*
@@ -98,12 +99,12 @@ router.put('/:protestId',validateSession, wrapAsync(async (req, res) => {
   let protestId = req.params.protestId;
   let userId = req.session.userId;
 
-  let protestDate = req.params.protestDate;
-  let protestName = req.params.protestName;
-  let email = req.params.email;
-  let protestAddress = req.params.protestAddress;
+  let protestDate = req.body.protestDate;
+  let protestName = req.body.protestName;
+  let email = req.body.email;
+  let protestAddress = req.body.protestAddress;
   // possible null parameters
-  let protestDescription = req.params.protestDescription;
+  let protestDescription = req.body.protestDescription;
 
   let protest = (await db.query('UPDATE protests SET protestDate = $3, protestName = $4, email = $5, protestAddress = $6, protestDescription = $7 WHERE protestId = $1 AND userId = $2' , 
   [protestId,userId,protestDate,protestName,email, protestAddress,protestDescription]));
@@ -178,7 +179,7 @@ router.post('/protest', validateSession, wrapAsync(async (req, res) => {
 
   let {protestDate, protestName, email, protestAddress, protestDescription} = req.body;
   
-  let result = await db.query('INSERT INTO protests (protestId, userId, protestDate, protestAddress, protestDescription, tags) ' +
+  let result = await db.query('INSERT INTO protests (protestId, userId, protestDate, protestName, email, protestAddress, protestDescription) ' +
     'VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT DO NOTHING', [protestId, userId, protestDate, protestName, email, protestAddress, protestDescription]);
   if (!result.rowCount) {
     res.status(409).send({
