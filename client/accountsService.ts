@@ -28,6 +28,7 @@ export class AccountsService {
   public email: string | null = null;
   public firstName: string | null = null;
   public lastName: string | null = null;
+  public ready = false;
 
   constructor() {
     makeObservable(this, {
@@ -35,6 +36,7 @@ export class AccountsService {
       email: observable,
       firstName: observable,
       lastName: observable,
+      ready: observable,
 
       loggedIn: computed,
       logOut: action
@@ -59,6 +61,7 @@ export class AccountsService {
     }
     let data = response.data;
     runInAction(() => {
+      this.ready = true;
       if (data.status !== 'ok') return;
       this.userId = data.userId;
       this.email = data.email;

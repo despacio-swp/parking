@@ -5,6 +5,8 @@ import theme from '../client/theme';
 import UserInfo from './UserInfo';
 import Link from 'next/link';
 import Divider from '@material-ui/core/Divider';
+import { observer } from 'mobx-react';
+import accountsService from '../client/accountsService';
 
 const AppMenu: React.FC<{ page: string }> = ({ page }) => {
   const [open, setOpen] = React.useState(false);
@@ -14,15 +16,24 @@ const AppMenu: React.FC<{ page: string }> = ({ page }) => {
     }
     setOpen(open);
   };
-  const pages = [
-    //['login', 'Login'],
-    //['register', 'Register'], 
-    ['profiles/self', 'Profile'],
+  let pages = [
     ['searchLots', 'Search Lots'],
-    ['lotProfile', 'Current Lot'],
-    ['lots', 'My Lots'],
-    ['protests', 'My Protests']
+    ['searchProtests', 'Search Protests']
   ];
+
+  if (!accountsService.loggedIn) {
+    pages.push(
+      ['login', 'Login'],
+      ['register', 'Register']
+    );
+  } else {
+    pages.push(
+      ['profiles/self', 'My Profile'],
+      ['lotProfile', 'Current Lot'],
+      ['lots', 'My Lots'],
+      ['protests', 'My Protests']
+    );
+  }
 
   return (
     <React.Fragment>
@@ -61,4 +72,4 @@ const AppMenu: React.FC<{ page: string }> = ({ page }) => {
   );
 };
 
-export default AppMenu;
+export default observer(AppMenu);

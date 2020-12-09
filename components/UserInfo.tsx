@@ -5,7 +5,9 @@ import { Button } from '@material-ui/core';
 
 function UserInfo() {
   let account = accountsService;
-  if (account.loggedIn) {
+  if (!account.ready) {
+    return <div>Loading</div>;
+  } else if (account.loggedIn) {
     return <div>
       {account.firstName} {account.lastName} ({account.email})
       <Button color="inherit" onClick={() => account.logOut()}>Log out</Button>
