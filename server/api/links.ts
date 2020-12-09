@@ -80,7 +80,7 @@ let createLinkSchema = ajv.compile({
   type: 'object',
   properties: {
     protestId: { type: 'string' },
-    lotId: { type: 'string' } 
+    lotId: { type: 'string' }
   },
   required: ['protestId', 'lotId']
 });

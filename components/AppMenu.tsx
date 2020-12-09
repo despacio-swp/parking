@@ -4,11 +4,7 @@ import Menu from '@material-ui/icons/Menu';
 import theme from '../client/theme';
 import UserInfo from './UserInfo';
 import Link from 'next/link';
-import Drawer from '@material-ui/core/Drawer';
 import Divider from '@material-ui/core/Divider';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
 
 const AppMenu: React.FC<{ page: string }> = ({ page }) => {
   const [open, setOpen] = React.useState(false);
@@ -21,7 +17,7 @@ const AppMenu: React.FC<{ page: string }> = ({ page }) => {
   const pages = [
     //['login', 'Login'],
     //['register', 'Register'], 
-    ['userProfile', 'Profile'],
+    ['profiles/self', 'Profile'],
     ['searchLots', 'Search Lots'],
     ['lotProfile', 'Current Lot'],
     ['lots', 'My Lots'],
