@@ -12,14 +12,15 @@ import accountsService from '../client/accountsService';
 function App() {
   let router = useRouter();
   if (!accountsService.ready) {
-    return <div>Loading</div>;
+    return <div>Loading account information</div>;
   }
   if (!accountsService.loggedIn) {
     router.push('/login');
+    return <div>Redirecting to login</div>;
   } else {
     router.push('/profiles/self');
+    return <div>Redirecting to profile</div>;
   }
-  return <div>Redirecting</div>;
   /*
   return <div>
     <Head>

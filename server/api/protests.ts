@@ -32,6 +32,26 @@ router.get('/all', wrapAsync(async (req, res) => {
   });
 }));
 
+router.get('/self', validateSession, wrapAsync(async (req, res) => {
+  if (!req.session) {
+    res.status(401).send({
+      status: 'error',
+      error: 'NOT_AUTHENTICATED',
+      details: 'no session exists'
+    });
+    return;
+  }
+
+  let protests = await db.query(
+    'SELECT protestId, protestDate, protestName, email, protestAddress, protestDescription FROM protests WHERE userId = $1',
+    [req.session.userId]
+  );
+
+  res.status(200).send({
+    protests: protests.rows
+  });
+}));
+
 /*
   GET REQUEST
 */

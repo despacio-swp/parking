@@ -22,7 +22,7 @@ export default function Login() {
     else {
       setLoginError(null);
       setLoginSuccess(true);
-      setTimeout(() => router.push('/'), 1000);
+      setTimeout(() => router.push('/profiles/self'), 1000);
     }
   }
 

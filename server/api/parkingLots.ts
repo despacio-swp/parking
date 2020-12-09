@@ -22,9 +22,28 @@ router.get('/', (_req, res) => res.send({ status: 'ok' }));
 /*
   GET REQUEST for All Lots
 */
-router.get('/all', wrapAsync(async (req, res) => {
+router.get('/all', wrapAsync(async (_req, res) => {
   let lots = await db.query('SELECT lotId, userId, capacity, lotAddress, pricePerHour, lotDescription FROM parkingLots');
   // send all lots at once
+  res.status(200).send({
+    lots: lots.rows
+  });
+}));
+
+router.get('/self', validateSession, wrapAsync(async (req, res) => {
+  if (!req.session) {
+    res.status(401).send({
+      status: 'error',
+      error: 'NOT_AUTHENTICATED',
+      details: 'no session exists'
+    });
+    return;
+  }
+
+  let lots = await db.query(
+    'SELECT lotId, userId, capacity, lotAddress, pricePerHour, lotDescription FROM parkingLots WHERE userId = $1',
+    [req.session.userId]
+  );
   res.status(200).send({
     lots: lots.rows
   });

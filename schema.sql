@@ -29,7 +29,7 @@ CREATE TABLE parkingLots (
     userId text REFERENCES accounts (userId) NOT NULL,
     capacity integer NOT NULL,
     lotAddress text NOT NULL,
-    pricePerHour integer NOT NULL,
+    pricePerHour decimal NOT NULL,
     lotDescription text,
     lotPhoto bytea
 );

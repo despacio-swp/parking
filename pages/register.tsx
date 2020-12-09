@@ -41,7 +41,7 @@ export default function Login() {
     else {
       setRequestError(null);
       setRequestSuccess(true);
-      setTimeout(() => router.push('/'), 1000);
+      setTimeout(() => router.push('/profiles/self'), 1000);
     }
   }
 
