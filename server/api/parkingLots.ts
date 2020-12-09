@@ -131,6 +131,7 @@ router.delete('/:lotId', validateSession, wrapAsync(async (req, res) => {
   let userId = req.session.userId;
 
   let query = await db.query('DELETE FROM parkingLots WHERE lotId = $1 AND userId = $2', [lotId, userId]);
+  await db.query('DELETE FROM lotOccupancy WHERE lotId = $1', [lotId]);
   if (!query.rowCount) {
     res.status(404).send({
       status: 'error',
