@@ -37,11 +37,10 @@ router.get('/lots/current', validateSession, wrapAsync(async (req, res) => {
     });
     return;
   }
-  let lot = (await db.query('SELECT lotid FROM lotoccupancy LEFT JOIN vehicles ON lotoccupancy.plateid = vehicles.plateid WHERE userid = $1', [req.session.userId])).rows[0];
+  let lot = (await db.query('SELECT lotid, lotoccupancy.plateid FROM lotoccupancy LEFT JOIN vehicles ON lotoccupancy.plateid = vehicles.plateid WHERE userid = $1', [req.session.userId]));
   res.status(200).send({
     status: 'ok',
-    userId: req.session.userId,
-    lotId: lot.lotid
+    lots: lot.rows
   });
 }));
 

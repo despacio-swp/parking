@@ -4,23 +4,23 @@ import AppMenu from '../../components/AppMenu';
 import { Paper, Box, TextField, Typography, Grid, Dialog, DialogTitle } from '@material-ui/core';
 import styles from './userProfile.module.scss';
 import Button from '@material-ui/core/Button';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import Link from 'next/link';
 import accountsService from '../../client/accountsService';
 
 export default function profile() {
-  
+
   let userid = accountsService.userId;
-  let lotid : string | undefined = "";
+  let lotid: string | undefined = "";
 
   let [open, setOpen] = React.useState(false);
-  let [lotData, setLotData] = React.useState({ capacity: 0, location: '', price: 0, description: ''});
+  let [lotData, setLotData] = React.useState({ capacity: 0, location: '', price: 0, description: '' });
   let [lotCount, setLotCount] = React.useState(0);
   let [plateName, setPlate] = React.useState('');
   let [parked, setParked] = React.useState(false);
   let [vehicleList, setVehicleList] = React.useState<JSX.Element[]>([<></>]); // stupid placeholder
   //let [plates, setPlates] = React.useState<string[]>([]);
-  let plateList : string[] = [];
+  let plateList: string[] = [];
 
   async function getData() {
     let response;
@@ -29,14 +29,13 @@ export default function profile() {
       lotid = last;
 
       response = await axios.get('/api/v1/lots/' + last);
-      console.log(response);
 
       let occ;
-      if(await getOccupancy()) {
+      if (await getOccupancy()) {
         occ = await getOccupancy();
       }
       let count = 0;
-      if(occ){
+      if (occ) {
         occ.data.plates.forEach((lot: any) => {
           count++;
         });
@@ -65,7 +64,7 @@ export default function profile() {
     setOpen(false);
   };
 
-  const handlePark = async (plateid : string) => {
+  const handlePark = async (plateid: string) => {
     try {
       let response = await axios.post('/api/v1/presence/lots/' + lotid + '/' + plateid);
     } catch (err) {
@@ -74,34 +73,69 @@ export default function profile() {
     setParked(true);
     handleClose();
   }
-  
+
   useEffect(() => {
     if (userid === null) return;
     let response;
+    let curr: AxiosResponse<any>;
     (async () => {
       await getData();
       try {
         response = await axios.get('/api/v1/vehicles/user/self/');
-        } catch(err) {
-          return null;
-        }
-        response.data.vehicles.forEach((vehicle : any) => {
-          plateList.push(vehicle.plateid);
-        })
-        //setPlates(plates.concat(response.data.vehicles));
+      } catch (err) {
+        return null;
+      }
+      response.data.vehicles.forEach((vehicle: any) => {
+        plateList.push(vehicle.plateid);
+      })
+      try {
+        curr = await axios.get('/api/v1/presence/lots/current');
+        let lots: string[] = [];
+        curr.data.lots.forEach((lot: any) => {
+          if(lot.lotid === lotid) {
+            lots.push(lot.plateid);
+          }
+        });
+        console.log('Lots');
+        console.log(lots);
+        console.log('PlateLists');
         console.log(plateList);
-        setVehicleList(vehicleList.concat(getPlateList()));
-      })();
+        plateList.forEach((plate: string) => {
+          if(lots.includes(plate)) {
+            console.log(plate + " already parked here!");
+            setParked(true);
+          } else {
+            console.log(plate + " not parked here!")
+          }
+        });
+
+        /* plateList.forEach((plate: string) => {
+          if (lots.includes(plate)) {
+            lots.forEach((lot: any) => {
+              if (lot.plateid === plate) {
+                console.log(plate + " Already Parked Here!");
+                setParked(true);
+              }
+            });
+          } else {
+            console.log("Not Parked!");
+          }
+
+        }); */
+      } catch (err) {
+        return null;
+      }
+      setVehicleList(vehicleList.concat(getPlateList()));
+    })();
   }, [userid]);
 
   function getPlateList() {
     let platesList: JSX.Element;
-    console.log(plateList);
     if (!plateList.length) {
       platesList = <p>You have no vehicles!</p>;
     } else {
       platesList = <div>
-        {plateList.map((plate : string) => (
+        {plateList.map((plate: string) => (
           // change this later if it looks ugly i guess
           // I ADDED A TO STRING!
           <p key={plate} onClick={() => handlePark(plate)}><b>License plate:</b> {plate}</p>
@@ -111,12 +145,12 @@ export default function profile() {
     return platesList;
   }
 
-    let parkMessage: JSX.Element;
-    if(parked){
-      parkMessage = <Typography variant="h6" align="left">You are parked in this lot!</Typography>
-    }else{
-      parkMessage = <Typography variant="h6" align="left">You are currently not parked in this lot</Typography>
-    }
+  let parkMessage: JSX.Element;
+  if (parked) {
+    parkMessage = <Typography variant="h6" align="left">You are parked in this lot!</Typography>
+  } else {
+    parkMessage = <Typography variant="h6" align="left">You are currently not parked in this lot</Typography>
+  }
 
 
   return <React.Fragment>
