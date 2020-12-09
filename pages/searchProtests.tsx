@@ -6,7 +6,7 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import { Box, FormControlLabel, RadioGroup, Radio, FormControl, FormLabel } from '@material-ui/core';
-import styles from './searchLots.module.scss';
+import styles from './searchProtests.module.scss';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import Button from '@material-ui/core/Button';
 import Link from 'next/link';
@@ -122,16 +122,23 @@ export default function Search(this: any) {
     <div className={styles.searchFilter}>
       <FormControl component="fieldset">
         <FormLabel component="legend">Sort by:</FormLabel>
-        <RadioGroup aria-label="filter" color="#556cd6" name="filter" value={value} onChange={(ev: React.ChangeEvent<HTMLInputElement>,
-        ): void => setValue(ev.target.value)}>
-          <FormControlLabel className={styles.radioSort} value="name" control={<Radio color="primary" />} label="name" />
-          <FormControlLabel className={styles.radioSort} value="address" control={<Radio color="primary" />} label="address" />
-        </RadioGroup>
-        <RadioGroup aria-label="filter" color="#556cd6" name="filter" value={sort} onChange={(ev: React.ChangeEvent<HTMLInputElement>,
-        ): void => setSort(ev.target.value)}>
-          <FormControlLabel className={styles.radioSort} value="asc" control={<Radio color="primary" />} label="Asc" />
-          <FormControlLabel className={styles.radioSort} value="dsc" control={<Radio color="primary" />} label="Desc" />
-        </RadioGroup>
+
+        <div className={styles.floatContainer}>
+          <div className={styles.floatChild}>
+            <RadioGroup id="radioLeft" aria-label="filter" color="#556cd6" name="filter" value={value} onChange={(ev: React.ChangeEvent<HTMLInputElement>,
+            ): void => setValue(ev.target.value)}>
+              <FormControlLabel className={styles.radioSort} value="name" control={<Radio color="primary" />} label="Name" />
+              <FormControlLabel className={styles.radioSort} value="address" control={<Radio color="primary" />} label="Address" />
+            </RadioGroup>
+          </div>
+          <div className={styles.floatChild}>
+            <RadioGroup id="radioRight" aria-label="filter" color="#556cd6" name="filter" value={sort} onChange={(ev: React.ChangeEvent<HTMLInputElement>,
+            ): void => setSort(ev.target.value)}>
+              <FormControlLabel className={styles.radioSort} value="asc" control={<Radio color="primary" />} label="Asc" />
+              <FormControlLabel className={styles.radioSort} value="dsc" control={<Radio color="primary" />} label="Desc" />
+            </RadioGroup>
+          </div>
+        </div>
       </FormControl>
     </div>
     <SearchBar className={styles.searchBar} onChange={e => { setQuery(e) }} onRequestSearch={() => console.log(query)} onCancelSearch={() => setQuery('')} />

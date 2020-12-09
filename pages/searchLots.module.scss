@@ -33,3 +33,13 @@
     width: auto;
     margin: auto;
 }
+
+.floatContainer {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 100px;
+}
+
+.floatChild {
+    float: left;
+}

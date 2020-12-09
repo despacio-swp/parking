@@ -29,7 +29,7 @@ export default function Search(this: any) {
         idList.push(lot.lotid);
       });
       idList.forEach((id: string) => {
-        occupancyList.push({id: id, occupancy: 0});
+        occupancyList.push({ id: id, occupancy: 0 });
       })
     }
     catch (err) {
@@ -49,9 +49,9 @@ export default function Search(this: any) {
       let count = 0;
       response.data.lots.forEach((lot: any) => {
         occupancyList.forEach((l: any) => {
-            if(l.id === lot.lotid) {
-              l.occupancy++;
-            }
+          if (l.id === lot.lotid) {
+            l.occupancy++;
+          }
         });
       });
       return count;
@@ -63,8 +63,8 @@ export default function Search(this: any) {
 
   function lotSelector(lotid: string, address: string, capacity: number) {
     let occ = 0;
-    for(let i = 0; i < occupancyList.length; i++) {
-      if(occupancyList[i].id == lotid) {
+    for (let i = 0; i < occupancyList.length; i++) {
+      if (occupancyList[i].id == lotid) {
         occ = occupancyList[i].occupancy;
       }
     }
@@ -92,13 +92,13 @@ export default function Search(this: any) {
 
   async function renderEntries() {
     let vals = await getEntries();
-    if(vals) {
+    if (vals) {
       await getOccupancy();
-      if(vals.length > 1) {
+      if (vals.length > 1) {
         let filtered = vals.filter((lot: any) => lot.lotaddress.includes(query));
         let elements = filtered.map((lot: any) => lotSelector(lot.lotid, lot.lotaddress, lot.capacity));
         handleSort(elements);
-        if((value=='address' && sort=='dsc') || (value=='capacity' && sort=='asc')) {
+        if ((value == 'address' && sort == 'dsc') || (value == 'capacity' && sort == 'asc')) {
           elements.reverse();
         }
         return elements;
@@ -149,16 +149,22 @@ export default function Search(this: any) {
     <div className={styles.searchFilter}>
       <FormControl component="fieldset">
         <FormLabel component="legend">Sort by:</FormLabel>
-        <RadioGroup aria-label="filter" color="#556cd6" name="filter" value={value} onChange={(ev: React.ChangeEvent<HTMLInputElement>,
-        ): void => setValue(ev.target.value)}>
-          <FormControlLabel className={styles.radioSort} value="address" control={<Radio color="primary" />} label="Address" />
-          <FormControlLabel className={styles.radioSort} value="capacity" control={<Radio color="primary" />} label="Capacity" />
-        </RadioGroup>
-        <RadioGroup aria-label="filter" color="#556cd6" name="filter" value={sort} onChange={(ev: React.ChangeEvent<HTMLInputElement>,
-        ): void => setSort(ev.target.value)}>
-          <FormControlLabel className={styles.radioSort} value="asc" control={<Radio color="primary" />} label="Asc" />
-          <FormControlLabel className={styles.radioSort} value="dsc" control={<Radio color="primary" />} label="Desc" />
-        </RadioGroup>
+        <div className={styles.floatContainer}>
+          <div className={styles.floatChild}>
+            <RadioGroup className={styles.floatChild} aria-label="filter" color="#556cd6" name="filter" value={value} onChange={(ev: React.ChangeEvent<HTMLInputElement>,
+            ): void => setValue(ev.target.value)}>
+              <FormControlLabel className={styles.radioSort} value="address" control={<Radio color="primary" />} label="Address" />
+              <FormControlLabel className={styles.radioSort} value="capacity" control={<Radio color="primary" />} label="Capacity" />
+            </RadioGroup>
+          </div>
+          <div className={styles.floatChild}>
+            <RadioGroup aria-label="filter" color="#556cd6" name="filter" value={sort} onChange={(ev: React.ChangeEvent<HTMLInputElement>,
+            ): void => setSort(ev.target.value)}>
+              <FormControlLabel className={styles.radioSort} value="asc" control={<Radio color="primary" />} label="Asc" />
+              <FormControlLabel className={styles.radioSort} value="dsc" control={<Radio color="primary" />} label="Desc" />
+            </RadioGroup>
+          </div>
+        </div>
       </FormControl>
     </div>
     <SearchBar className={styles.searchBar} onChange={e => { setQuery(e) }} onRequestSearch={() => console.log(query)} onCancelSearch={() => setQuery('')} />
