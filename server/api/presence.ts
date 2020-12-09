@@ -18,6 +18,15 @@ router.use(cookieParse);
 
 router.get('/', (_req, res) => res.send({ status: 'ok' }));
 
+router.get('/users/all', wrapAsync(async (req, res) => {
+  let lots = await db.query('SELECT userId, lotoccupancy.plateid FROM lotOccupancy LEFT JOIN vehicles ON lotoccupancy.plateid = vehicles.plateid');
+
+  //trying to send all lots at once
+  res.status(200).send({
+    lots: lots.rows
+  });
+}));
+
 // Return list of plate IDs from 
 router.get('/lots/all', wrapAsync(async (req, res) => {
   let lots = await db.query('SELECT lotId, plateId FROM lotOccupancy ORDER BY lotId');

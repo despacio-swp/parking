@@ -23,6 +23,7 @@ export default function App() {
       <ListLink target="userProfile" />
       <ListLink target="lots" />
       <ListLink target="protests" />
+      <ListLink target="searchProtests" />
     </ul>
   </div>;
 }
