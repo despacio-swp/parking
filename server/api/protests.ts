@@ -71,12 +71,12 @@ router.get('/:protestId', wrapAsync(async (req, res) => {
   let protest = query.rows[0];
   res.status(200).send({
     status: 'ok',
-    userId: protest.userId,
-    protestDate: protest.protestDate,
-    protestName: protest.protestName,
+    userId: protest.userid,
+    protestDate: protest.protestdate,
+    protestName: protest.protestname,
     email: protest.email,
-    protestAddress: protest.protestAddress,
-    protestDescription: protest.protestDescription
+    protestAddress: protest.protestaddress,
+    protestDescription: protest.protestdescription
   });
 }));
 

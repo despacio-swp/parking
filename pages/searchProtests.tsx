@@ -50,7 +50,7 @@ export default function Search(this: any) {
               secondary={'Location: ' + address}
             />
             <ListItemSecondaryAction>
-              <Link href={"/protsetProfile/" + protestId} passHref>
+              <Link href={"/ProtestProfile/" + protestId} passHref>
                 <Button variant="contained" color="primary">
                   Select
         </Button>
