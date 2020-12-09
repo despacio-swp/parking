@@ -86,7 +86,7 @@ router.post('/lots/:lotId/:plateId', wrapAsync(async (req, res) => {
   }
 }));
 
-// Post yourself in current lot
+// Delete yourself in current lot
 router.delete('/lots/:lotId/:plateId', wrapAsync(async (req, res) => {
   let lotId = req.params.lotId;
   let plateId = req.params.plateId;

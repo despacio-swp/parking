@@ -1,18 +1,26 @@
 import React, { useEffect } from 'react';
 import Head from 'next/head';
 import AppMenu from '../../components/AppMenu';
-import { Paper, Box, TextField, Typography, Grid, makeStyles } from '@material-ui/core';
+import { Paper, Box, TextField, Typography, Grid, Dialog, DialogTitle } from '@material-ui/core';
 import styles from './userProfile.module.scss';
 import Button from '@material-ui/core/Button';
 import axios from 'axios';
-import { useRouter } from 'next/router';
+import Link from 'next/link';
+import accountsService from '../../client/accountsService';
 
 export default function profile() {
-
+  
+  let userid = accountsService.userId;
   let lotid : string | undefined = "";
 
+  let [open, setOpen] = React.useState(false);
   let [lotData, setLotData] = React.useState({ capacity: 0, location: '', price: 0, description: ''});
   let [lotCount, setLotCount] = React.useState(0);
+  let [plateName, setPlate] = React.useState('');
+  let [parked, setParked] = React.useState(false);
+  let [vehicleList, setVehicleList] = React.useState<JSX.Element[]>([<></>]); // stupid placeholder
+  //let [plates, setPlates] = React.useState<string[]>([]);
+  let plateList : string[] = [];
 
   async function getData() {
     let response;
@@ -42,6 +50,7 @@ export default function profile() {
     return response;
   }
 
+
   async function getOccupancy() {
     let response;
     try {
@@ -52,17 +61,62 @@ export default function profile() {
     }
     return response
   }
+  const handleClose = () => {
+    setOpen(false);
+  };
 
-  async function park() {
+  const handlePark = async (plateid : string) => {
+    try {
+      let response = await axios.post('/api/v1/presence/lots/' + lotid + '/' + plateid);
+    } catch (err) {
+      console.log("Oops!  You're already parked here!")
+    }
+    setParked(true);
+    handleClose();
+  }
+  
+  useEffect(() => {
+    if (userid === null) return;
+    let response;
+    (async () => {
+      await getData();
+      try {
+        response = await axios.get('/api/v1/vehicles/user/self/');
+        } catch(err) {
+          return null;
+        }
+        response.data.vehicles.forEach((vehicle : any) => {
+          plateList.push(vehicle.plateid);
+        })
+        //setPlates(plates.concat(response.data.vehicles));
+        console.log(plateList);
+        setVehicleList(vehicleList.concat(getPlateList()));
+      })();
+  }, [userid]);
 
+  function getPlateList() {
+    let platesList: JSX.Element;
+    console.log(plateList);
+    if (!plateList.length) {
+      platesList = <p>You have no vehicles!</p>;
+    } else {
+      platesList = <div>
+        {plateList.map((plate : string) => (
+          // change this later if it looks ugly i guess
+          // I ADDED A TO STRING!
+          <p key={plate} onClick={() => handlePark(plate)}><b>License plate:</b> {plate}</p>
+        ))}
+      </div>;
+    }
+    return platesList;
   }
 
-  useEffect(() => {
-    (async () => {
-      //const {lotid} = router.query;
-      await getData();
-    })();
-  }, []);
+    let parkMessage: JSX.Element;
+    if(parked){
+      parkMessage = <Typography variant="h6" align="left">You are parked in this lot!</Typography>
+    }else{
+      parkMessage = <Typography variant="h6" align="left">You are currently not parked in this lot</Typography>
+    }
 
 
   return <React.Fragment>
@@ -77,7 +131,18 @@ export default function profile() {
         <Typography variant="h6" align="left">Available Space: {lotCount}/{lotData.capacity}</Typography>
         <Typography variant="h6" align="left">Description: {lotData.description}</Typography>
         <Typography variant="h6" align="left">Price Per Hour: ${lotData.price}/hr</Typography>
-        <Button variant="contained">Park Here</Button>
+        {parkMessage}
+        <Button variant="contained" onClick={() => setOpen(true)} >Park Here</Button>
+        <Dialog open={open} onClose={() => setOpen(false)}>
+          <DialogTitle>Choose the vehicle that you would like to use to park with.</DialogTitle>
+          {vehicleList}
+          <Link href={"/searchLots/"} passHref>
+            <Button variant="contained" onClick={() => handleClose()}> Cancel </Button>
+          </Link>
+        </Dialog>
+        <Link href={"/searchLots/"} passHref>
+          <Button variant="contained" onClick={() => handleClose()}> Cancel </Button>
+        </Link>
       </Grid>
     </Paper>
   </React.Fragment>;

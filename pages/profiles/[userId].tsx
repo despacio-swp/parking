@@ -142,11 +142,6 @@ function profile() {
           <Typography variant="h6" align="left">Email: {email}</Typography>
           <Typography variant="h6" align="left">Car Information</Typography>
           {platesList}
-          {/*
-          <Typography variant="h6" align="left">Make: {make} </Typography>
-          <Typography variant="h6" align="left">Model: {model}</Typography>
-          <Typography variant="h6" align="left">Plate ID: {plate}</Typography>
-          */}
         </Grid>
       </Paper>
       <Fab className={styles.fab} onClick={() => setOpen(true)} color="secondary" aria-label="edit">
@@ -159,11 +154,6 @@ function profile() {
           <TextField value={firstNameTemp} label="First Name" variant="outlined" margin="normal" fullWidth required onChange={event => setFirstNameTemp(event.target.value)}>{firstName}</TextField>
           <TextField value={lastNameTemp} label="Last Name" variant="outlined" margin="normal" fullWidth required onChange={event => setLastNameTemp(event.target.value)}>{lastName}</TextField>
           <TextField value={emailTemp} label="Email" variant="outlined" margin="normal" fullWidth required onChange={event => setEmailTemp(event.target.value)}>{email}</TextField>
-          {/*
-          <TextField value={makeTemp} label="Make" variant="outlined" margin="normal" fullWidth required onChange={event => setMakeTemp(event.target.value)}>{make}</TextField>
-          <TextField value={modelTemp} label="Model" variant="outlined" margin="normal" fullWidth required onChange={event => setModelTemp(event.target.value)}>{model}</TextField>
-          <TextField value={plateTemp} label="Model" variant="outlined" margin="normal" fullWidth required onChange={event => setPlateTemp(event.target.value)}>{plate}</TextField>
-          */}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => handleClose()}> Cancel </Button>

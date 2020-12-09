@@ -23,7 +23,7 @@ router.get('/user/self', validateSession, wrapAsync(async (req, res) => {
         });
         return;
       }
-      let vehicles = (await db.query('SELECT plateid FROM vehicles WHERE userid = $1', [req.session.userId])).rows[0];
+      let vehicles = (await db.query('SELECT plateid FROM vehicles WHERE userid = $1', [req.session.userId]));
       res.status(200).send({
         status: 'ok',
         vehicles: vehicles.rows

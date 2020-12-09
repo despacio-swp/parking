@@ -54,5 +54,6 @@ CREATE TABLE links (
 
 CREATE TABLE lotOccupancy (
     plateId text REFERENCES vehicles (plateId) NOT NULL,
-    lotId text REFERENCES parkingLots (lotId) NOT NULL
+    lotId text REFERENCES parkingLots (lotId) NOT NULL,
+    UNIQUE (lotid, plateid)
 );
