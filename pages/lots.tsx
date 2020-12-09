@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import AppMenu from '../components/AppMenu';
 import { Grid, Menu, MenuItem, TextField, Button, IconButton, Fab, Typography } from '@material-ui/core';
-import { Card, CardHeader, CardContent, CardActions, Collapse, List, ListItem, ListItemText } from '@material-ui/core';
+import { Card, CardHeader, CardContent, CardActions, Collapse, List, ListItem, ListItemText, ListSubheader } from '@material-ui/core';
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@material-ui/core';
 import MoreVert from '@material-ui/icons/MoreVert';
 import ExpandMore from '@material-ui/icons/ExpandMore';
@@ -29,11 +29,15 @@ interface EditLot {
 }
 
 interface Occupant {
+    id: string;
+    lotId: string;
     name: string;
     license: string;
+    email: string;
 }
 
 function LotCard(props: { lot: Lot, onEdit: (lot: EditLot) => any, onDelete: (lotId: string) => any }) {
+    let [occupantsReady, setOccupantsReady] = React.useState(false);
     const [occupants, setOccupants] = React.useState<Occupant[]>([]);
     const [expanded, setExpanded] = React.useState(false);
     const [anchorEl, setAnchorEl] = React.useState(null);
@@ -71,6 +75,27 @@ function LotCard(props: { lot: Lot, onEdit: (lot: EditLot) => any, onDelete: (lo
         setEditOpen(false);
     };
 
+    async function toggleExpand() {
+        if (expanded) {
+            setExpanded(false);
+            setOccupantsReady(false);
+            return;
+        } else {
+            setExpanded(true);
+            setOccupantsReady(false);
+            // fetch occupants
+            let response = await axios.get('/api/v1/presence/users/' + lot.id);
+            setOccupants(response.data.users.map((occupant: any) => ({
+                id: occupant.userid,
+                lotId: occupant.lotid,
+                name: occupant.firstname + ' ' + occupant.lastname,
+                license: occupant.plateid,
+                email: occupant.email
+            })));
+            setOccupantsReady(true);
+        }
+    }
+
     const error = (type: string) => {
         switch (type) {
             case 'name':
@@ -90,6 +115,19 @@ function LotCard(props: { lot: Lot, onEdit: (lot: EditLot) => any, onDelete: (lo
         return error(type) ? 'Empty field!' : '';
     };
 
+    let occupantsView: JSX.Element[];
+    if (!expanded) {
+        occupantsView = [];
+    } else if (occupantsReady) {
+        occupantsView = occupants.map(occupant => (
+            <ListItem dense key={occupant.id}>
+                <ListItemText primary={occupant.name + ' (' + occupant.email + ')'} secondary={occupant.license} />
+            </ListItem>
+        ));
+    } else {
+        occupantsView = [<ListItem dense key="loading">Loading...</ListItem>];
+    }
+
     return <>
         <Grid item>
             <Card className={styles.card}>
@@ -108,18 +146,15 @@ function LotCard(props: { lot: Lot, onEdit: (lot: EditLot) => any, onDelete: (lo
                 </Menu>
                 <CardActions disableSpacing>
                     <Button disabled> {props.lot.occupancy} / {props.lot.capacity} </Button>
-                    <IconButton className={styles.expand} onClick={() => setExpanded(!expanded)}>
+                    <IconButton className={styles.expand} onClick={toggleExpand}>
                         <ExpandMore />
                     </IconButton>
                 </CardActions>
                 <Collapse in={expanded} timeout="auto" unmountOnExit>
                     <CardContent>
-                        <List>
-                            {occupants.map(occupant => (
-                                <ListItem dense key={occupant.license}>
-                                    <ListItemText primary={occupant.name} secondary={occupant.license} />
-                                </ListItem>
-                            ))}
+                        <List style={{ maxHeight: 300 }}>
+                            <ListSubheader> Current Occupents </ListSubheader>
+                            {occupantsView}
                         </List>
                     </CardContent>
                 </Collapse>

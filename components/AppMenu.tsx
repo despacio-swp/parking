@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
-import { AppBar, Toolbar, IconButton, Typography, Grid, Drawer, List, ListItem, ListItemText } from '@material-ui/core';
+import React from 'react';
+import { AppBar, Toolbar, IconButton, Typography, Grid, Drawer, List, ListItem, ListItemText, Divider } from '@material-ui/core';
 import Menu from '@material-ui/icons/Menu';
 import theme from '../client/theme';
 import UserInfo from './UserInfo';
 import Link from 'next/link';
-import Divider from '@material-ui/core/Divider';
 import { observer } from 'mobx-react';
 import accountsService from '../client/accountsService';
 

@@ -53,9 +53,9 @@ router.get('/lots/current', validateSession, wrapAsync(async (req, res) => {
   });
 }));
 
-router.get('/users/:lotid', wrapAsync(async (req, res) => {
+router.get('/users/:lotId', wrapAsync(async (req, res) => {
   let lotid = req.params.lotId;
-  let users = await db.query('SELECT accounts.userId, accounts.firstName, accounts.lastName, accounts.email, lotoccupancy.plateid FROM lotOccupancy JOIN vehicles ON lotoccupancy.plateid = vehicles.plateid JOIN accounts ON vehicles.userid = accounts.userid WHERE lotid = $1', [lotid]);
+  let users = await db.query('SELECT accounts.userId, accounts.firstName, accounts.lastName, accounts.email, lotoccupancy.plateid FROM lotOccupancy JOIN vehicles ON lotoccupancy.plateid = vehicles.plateid JOIN accounts ON vehicles.userid = accounts.userid WHERE lotOccupancy.lotid = $1', [lotid]);
 
   //trying to send all lots at once
   res.status(200).send({
