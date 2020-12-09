@@ -5,6 +5,7 @@ import theme from '../client/theme';
 import UserInfo from './UserInfo';
 import Link from 'next/link';
 import Drawer from '@material-ui/core/Drawer';
+import Divider from '@material-ui/core/Divider';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -16,6 +17,22 @@ const AppMenu: React.FC<{ page: string }> = ({ page }) => {
       return;
     }
     setOpen(open);
+  };
+  const pages = [
+    ['login', 'Login'],
+    ['register', 'Register'], 
+    ['userProfile', 'Profile'], 
+    ['searchLots', 'Search Lots'], 
+    ['lotProfile', 'Current Lot'],
+    ['lots', 'My Lots'], 
+    ['protests', 'My Protests']
+  ];
+
+  const divider = (divide: boolean) => {
+    if (divide) {
+      return <Divider />;
+    }
+    return;
   };
 
   return (
@@ -39,12 +56,15 @@ const AppMenu: React.FC<{ page: string }> = ({ page }) => {
       </AppBar>
       <Drawer open={open} onClose={toggleDrawer(false)}>
         <List style={{width: 300}}>
-          {['login', 'searchLots', 'lotProfile', 'register', 'userProfile', 'lots', 'protests'].map((text, index) => (
-            <Link href={'/' + text}>
-              <ListItem button key={text} onClick={toggleDrawer(false)}>
-                <ListItemText primary={text} />
-              </ListItem>
-            </Link>
+          {pages.map(text => (
+            <React.Fragment>
+              <Link href={'/' + text[0]}>
+                <ListItem button key={text[1]} onClick={toggleDrawer(false)}>
+                  <ListItemText primary={text[1]} />
+                </ListItem>
+              </Link>
+              {divider(text[0] === 'lotProfile')}
+            </React.Fragment>
           ))}
         </List>
       </Drawer>
