@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import AppMenu from '../components/AppMenu';
 import { Grid, Menu, MenuItem, TextField, Button, IconButton, Fab, Typography } from '@material-ui/core';
-import { Card, CardHeader, CardContent, CardActions, Collapse, List, ListItem, ListItemText } from '@material-ui/core';
+import { Card, CardHeader, CardContent, CardActions, Collapse, List, ListItem, ListItemText, ListSubheader } from '@material-ui/core';
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@material-ui/core';
 import MoreVert from '@material-ui/icons/MoreVert';
 import ExpandMore from '@material-ui/icons/ExpandMore';
@@ -19,8 +19,11 @@ interface Lot {
 }
 
 interface Occupant {
+    id: string;
+    lotId: string;
     name: string;
     license: string;
+    email: string;
 }
 
 function LotCard(props: any) {
@@ -29,7 +32,14 @@ function LotCard(props: any) {
     const [anchorEl, setAnchorEl] = React.useState(null);
 
     useEffect(() => void (async () => {
-        
+        let response = await axios.get('/api/v1/presence/users/all');
+        setOccupants(response.data.lots.map((occupant: any) => ({
+            id: occupant.userid,
+            lotId: occupant.lotid,
+            name: occupant.firstname + " " + occupant.lastname,
+            license: occupant.plateid,
+            email: occupant.email
+        })));
     })(), []);
 
     const handleOpenMenu = (event: any) => {
@@ -74,10 +84,11 @@ function LotCard(props: any) {
                 </CardActions>
                 <Collapse in={expanded} timeout="auto" unmountOnExit>
                     <CardContent>
-                        <List>
-                            {occupants.map(occupant => (
-                                <ListItem dense key={occupant.license}>
-                                    <ListItemText primary={occupant.name} secondary={occupant.license} />
+                        <List style={{maxHeight: 300}}>
+                            <ListSubheader> Current Occupents </ListSubheader>
+                            {occupants.filter(occupant => occupant.lotId === props.lot.id).map(occupant => (
+                                <ListItem dense key={occupant.id}>
+                                    <ListItemText primary={occupant.name + " (" + occupant.email + ")"} secondary={occupant.license} />
                                 </ListItem>
                             ))}
                         </List>

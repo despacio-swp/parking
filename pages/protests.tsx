@@ -161,7 +161,7 @@ export default function ProtestPage() {
             <AppMenu page="Protests"/>
             <Grid container direction="column" alignItems="center">
                 {protests.map(protest =>
-                <React.Fragment>
+                <React.Fragment key={protest.name}>
                     <ProtestCard protest={protest}
                         openEdit={() => handleOpenEditDialog(protest)}
                         onEdit={() => handleEdit(protest)}

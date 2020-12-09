@@ -130,6 +130,7 @@ router.delete('/:lotId', validateSession, wrapAsync(async (req, res) => {
   let lotId = req.params.lotId;
   let userId = req.session.userId;
 
+  await db.query('DELETE FROM lotOccupancy WHERE lotId = $1', [lotId]);
   let query = await db.query('DELETE FROM parkingLots WHERE lotId = $1 AND userId = $2', [lotId, userId]);
   if (!query.rowCount) {
     res.status(404).send({

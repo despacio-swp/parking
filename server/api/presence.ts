@@ -18,6 +18,15 @@ router.use(cookieParse);
 
 router.get('/', (_req, res) => res.send({ status: 'ok' }));
 
+router.get('/users/all', wrapAsync(async (req, res) => {
+  let lots = await db.query('SELECT accounts.userId, accounts.firstName, accounts.lastName, accounts.email, lotoccupancy.plateid, lotOccupancy.lotid FROM lotOccupancy JOIN vehicles ON lotoccupancy.plateid = vehicles.plateid JOIN accounts ON vehicles.userid = accounts.userid');
+
+  //trying to send all lots at once
+  res.status(200).send({
+    lots: lots.rows
+  });
+}));
+
 // Return list of plate IDs from 
 router.get('/lots/all', wrapAsync(async (req, res) => {
   let lots = await db.query('SELECT lotId, plateId FROM lotOccupancy ORDER BY lotId');
@@ -41,6 +50,16 @@ router.get('/lots/current', validateSession, wrapAsync(async (req, res) => {
   res.status(200).send({
     status: 'ok',
     lots: lot.rows
+  });
+}));
+
+router.get('/users/:lotid', wrapAsync(async (req, res) => {
+  let lotid = req.params.lotId;
+  let users = await db.query('SELECT accounts.userId, accounts.firstName, accounts.lastName, accounts.email, lotoccupancy.plateid FROM lotOccupancy JOIN vehicles ON lotoccupancy.plateid = vehicles.plateid JOIN accounts ON vehicles.userid = accounts.userid WHERE lotid = $1', [lotid]);
+
+  //trying to send all lots at once
+  res.status(200).send({
+    users: users.rows
   });
 }));
 
