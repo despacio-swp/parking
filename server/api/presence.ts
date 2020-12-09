@@ -19,7 +19,7 @@ router.use(cookieParse);
 router.get('/', (_req, res) => res.send({ status: 'ok' }));
 
 router.get('/users/all', wrapAsync(async (req, res) => {
-  let lots = await db.query('SELECT accounts.userId, accounts.firstName, accounts.lastName, accounts.email, lotoccupancy.plateid FROM lotOccupancy JOIN vehicles ON lotoccupancy.plateid = vehicles.plateid JOIN accounts ON vehicles.userid = accounts.userid');
+  let lots = await db.query('SELECT accounts.userId, accounts.firstName, accounts.lastName, accounts.email, lotoccupancy.plateid, lotOccupancy.lotid FROM lotOccupancy JOIN vehicles ON lotoccupancy.plateid = vehicles.plateid JOIN accounts ON vehicles.userid = accounts.userid');
 
   //trying to send all lots at once
   res.status(200).send({
