@@ -1,10 +1,26 @@
 import React from 'react';
+import { useRouter } from 'next/router';
+import { observer } from 'mobx-react';
+/*
 import Head from 'next/head';
 import ListLink from '../components/ListLink';
 import UserInfo from '../components/UserInfo';
 import AppMenu from '../components/AppMenu';
+*/
+import accountsService from '../client/accountsService';
 
-export default function App() {
+function App() {
+  let router = useRouter();
+  if (!accountsService.ready) {
+    return <div>Loading</div>;
+  }
+  if (!accountsService.loggedIn) {
+    router.push('/login');
+  } else {
+    router.push('/profiles/self');
+  }
+  return <div>Redirecting</div>;
+  /*
   return <div>
     <Head>
       <title>Index</title>
@@ -26,4 +42,7 @@ export default function App() {
       <ListLink target="searchProtests" />
     </ul>
   </div>;
+  */
 }
+
+export default observer(App);
