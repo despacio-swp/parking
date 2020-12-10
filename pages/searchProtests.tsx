@@ -45,17 +45,21 @@ export default function Search(this: any) {
       <React.Fragment key={name + ' | ' + address}>
         <Box className={styles.searchBox} boxShadow={3}>
           <ListItem>
-            <ListItemText
-              primary={'Name: ' + name}
-              secondary={'Location: ' + address}
-            />
-            <ListItemSecondaryAction>
-              <Link href={"/ProtestProfile/" + protestId} passHref>
-                <Button variant="contained" color="primary">
-                  Select
-        </Button>
-              </Link>
-            </ListItemSecondaryAction>
+            <div className={styles.listBox}>
+              <ListItemText
+                primary={'Name: ' + name}
+                secondary={'Location: ' + address}
+              />
+            </div>
+            <div className={styles.listButton}>
+              <ListItemSecondaryAction>
+                <Link href={"/ProtestProfile/" + protestId} passHref>
+                  <Button variant="contained" color="primary">
+                    Select
+                  </Button>
+                </Link>
+              </ListItemSecondaryAction>
+            </div>
           </ListItem>
         </Box>
       </React.Fragment>

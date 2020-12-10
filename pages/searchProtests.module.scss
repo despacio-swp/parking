@@ -13,6 +13,16 @@
     margin-top: 20px;
     padding: 20px;
     box-shadow: 3;
+    display: block;
+}
+
+.listBox{
+    width: 75%;
+    display: inline-block;
+}
+
+.listButton{
+    display: inline-block;
 }
 
 .searchResult {

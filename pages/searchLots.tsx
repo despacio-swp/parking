@@ -72,17 +72,21 @@ export default function Search(this: any) {
       <React.Fragment key={address + ' | ' + capacity.toString()}>
         <Box className={styles.searchBox} boxShadow={3}>
           <ListItem>
+            <div  className={styles.listBox}>
             <ListItemText
               primary={'Address: ' + address}
               secondary={'Capacity: ' + occ + '/' + capacity}
             />
+            </div>
+            <div  className={styles.listButton}>
             <ListItemSecondaryAction>
               <Link href={"/lotProfile/" + lotid} passHref>
                 <Button variant="contained" color="primary">
                   Select
-        </Button>
+                </Button>
               </Link>
             </ListItemSecondaryAction>
+            </div>
           </ListItem>
         </Box>
       </React.Fragment>
