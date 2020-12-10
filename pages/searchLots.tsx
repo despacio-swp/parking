@@ -30,9 +30,8 @@ export default function Search(this: any) {
       });
       idList.forEach((id: string) => {
         occupancyList.push({ id: id, occupancy: 0 });
-      })
-    }
-    catch (err) {
+      });
+    } catch (err) {
       if (err.response) response = err.response;
       else throw err;
     }
@@ -44,27 +43,22 @@ export default function Search(this: any) {
 
   async function getOccupancy() {
     let response;
-    try {
-      response = await axios.get('/api/v1/presence/lots/all');
-      let count = 0;
-      response.data.lots.forEach((lot: any) => {
-        occupancyList.forEach((l: any) => {
-          if (l.id === lot.lotid) {
-            l.occupancy++;
-          }
-        });
+    response = await axios.get('/api/v1/presence/lots/all');
+    let count = 0;
+    response.data.lots.forEach((lot: any) => {
+      occupancyList.forEach((l: any) => {
+        if (l.id === lot.lotid) {
+          l.occupancy++;
+        }
       });
-      return count;
-    }
-    catch (err) {
-      throw err;
-    }
+    });
+    return count;
   }
 
   function lotSelector(lotid: string, address: string, capacity: number) {
     let occ = 0;
     for (let i = 0; i < occupancyList.length; i++) {
-      if (occupancyList[i].id == lotid) {
+      if (occupancyList[i].id === lotid) {
         occ = occupancyList[i].occupancy;
       }
     }
@@ -80,7 +74,7 @@ export default function Search(this: any) {
             </div>
             <div  className={styles.listButton}>
             <ListItemSecondaryAction>
-              <Link href={"/lotProfile/" + lotid} passHref>
+              <Link href={'/lotProfile/' + lotid} passHref>
                 <Button variant="contained" color="primary">
                   Select
                 </Button>
@@ -90,8 +84,8 @@ export default function Search(this: any) {
           </ListItem>
         </Box>
       </React.Fragment>
-    )
-    return frag
+    );
+    return frag;
   }
 
   async function renderEntries() {
@@ -102,7 +96,7 @@ export default function Search(this: any) {
         let filtered = vals.filter((lot: any) => lot.lotaddress.includes(query));
         let elements = filtered.map((lot: any) => lotSelector(lot.lotid, lot.lotaddress, lot.capacity));
         handleSort(elements);
-        if ((value == 'address' && sort == 'dsc') || (value == 'capacity' && sort == 'asc')) {
+        if ((value === 'address' && sort === 'dsc') || (value === 'capacity' && sort === 'asc')) {
           elements.reverse();
         }
         return elements;
@@ -110,27 +104,26 @@ export default function Search(this: any) {
         return vals.map((lot: any) => lotSelector(lot.lotid, lot.lotaddress, lot.capacity));
       }
     }
-    return <div className={styles.oops}>Nothing to see here ¯\_(ツ)_/¯</div>
+    return <div className={styles.oops}>Nothing to see here ¯\_(ツ)_/¯</div>;
   }
 
   function handleSort(elements: JSX.Element[]) {
-    if (value == 'address') {
+    if (value === 'address') {
       elements.sort(function (a, b) {
         let keyA = a.key!.toString();
         let keyB = b.key!.toString();
-        let addA = keyA.substring(0, keyA.indexOf(" | "));
-        let addB = keyB.substring(0, keyB.indexOf(" | "));
+        let addA = keyA.substring(0, keyA.indexOf(' | '));
+        let addB = keyB.substring(0, keyB.indexOf(' | '));
         return addA > addB ? 1 : -1;
-      })
+      });
     } else {
       elements.sort(function (a, b) {
         let keyA = a.key!.toString();
         let keyB = b.key!.toString();
-        let capA = parseInt(keyA.substring(keyA.indexOf(" | ")));
-        let capB = parseInt(keyB.substring(keyB.indexOf(" | ")));
+        let capA = parseInt(keyA.substring(keyA.indexOf(' | ')));
+        let capB = parseInt(keyB.substring(keyB.indexOf(' | ')));
         return capA - capB;
-      })
-
+      });
     }
     elements.forEach(element => {
       console.log(element.key);
@@ -142,8 +135,6 @@ export default function Search(this: any) {
       setLotEntries(await renderEntries());
     })();
   }, [value, query, sort]);
-
-
 
   return <React.Fragment>
     <Head>
