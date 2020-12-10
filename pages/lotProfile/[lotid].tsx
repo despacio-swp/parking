@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import Head from 'next/head';
 import AppMenu from '../../components/AppMenu';
 import { Paper, Box, TextField, Typography, Grid, Dialog, DialogContentText } from '@material-ui/core';
-import styles from './userProfile.module.scss';
+import styles from '../profiles/userProfile.module.scss';
 import Button from '@material-ui/core/Button';
 import axios, { AxiosResponse } from 'axios';
 import Link from 'next/link';
