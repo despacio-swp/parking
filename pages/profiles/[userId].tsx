@@ -7,7 +7,7 @@ import {
   DialogActions, DialogContent, DialogContentText, Button, IconButton
 } from '@material-ui/core';
 import styles from './userProfile.module.scss';
-import { Avatar, Fab } from '@material-ui/core';
+import { Fab } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
 import Add from '@material-ui/icons/Add';
 import { useRouter } from 'next/router';
@@ -17,12 +17,6 @@ import Delete from '@material-ui/icons/Delete';
 
 /* eslint-disable max-len */
 
-const useStyle = makeStyles(theme => ({
-  large: {
-    width: theme.spacing(7),
-    height: theme.spacing(7)
-  }
-}));
 
 function profile() {
   let router = useRouter();
@@ -151,9 +145,7 @@ function profile() {
     contents = <>
       <Paper className={styles.profileBox} elevation = {3}>
         <Grid>
-          <Avatar className={classes.large}/>
-        </Grid>
-        <Grid>
+          
           <Typography variant="h6" align="left">User Name: {firstName} {lastName}</Typography>
           <Typography variant="h6" align="left">Email: {email}</Typography>
           <Typography variant="h6" align="left">Car Information</Typography>
