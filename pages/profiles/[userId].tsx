@@ -107,7 +107,6 @@ function profile() {
     setOpenAdd(false);
   };
 
-  const classes = useStyle();
 
   const handleRemoveItem = async (target: string) => {
     let response = await axios.delete('/api/v1/profiles/self/vehicles/' + target);
@@ -145,7 +144,7 @@ function profile() {
     contents = <>
       <Paper className={styles.profileBox} elevation = {3}>
         <Grid>
-          
+
           <Typography variant="h6" align="left">User Name: {firstName} {lastName}</Typography>
           <Typography variant="h6" align="left">Email: {email}</Typography>
           <Typography variant="h6" align="left">Car Information</Typography>
