@@ -28,7 +28,7 @@ const AppMenu: React.FC<{ page: string }> = ({ page }) => {
   } else {
     pages.push(
       ['profiles/self', 'My Profile'],
-      ['lotProfile', 'Current Lot'],
+      // ['lotProfile', 'Current Lot'],
       ['lots', 'My Lots'],
       ['protests', 'My Protests']
     );
