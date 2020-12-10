@@ -217,14 +217,14 @@ export default function LotPage() {
     const [openAddDialog, setOpenAddDialog] = React.useState(false);
 
     useEffect(() => void (async () => {
-        let response = await axios.get('/api/v1/lots/all');
+        let response = await axios.get('/api/v1/lots/self');
         setLots(response.data.lots.map((lot: any) => ({
             id: lot.lotid,
             name: lot.lotdescription,
             location: lot.lotaddress,
             capacity: lot.capacity,
-            occupancy: 0,
-            price: lot.priceperhour
+            occupancy: +lot.occupancy,
+            price: +lot.priceperhour
         })));
     })(), []);
 

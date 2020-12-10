@@ -23,7 +23,7 @@ router.get('/', (_req, res) => res.send({ status: 'ok' }));
   GET REQUEST for All Lots
 */
 router.get('/all', wrapAsync(async (_req, res) => {
-  let lots = await db.query('SELECT lotId, userId, capacity, lotAddress, pricePerHour, lotDescription FROM parkingLots');
+  let lots = await db.query('SELECT lotId, userId, capacity, lotAddress, pricePerHour, lotDescription, (SELECT COUNT(lotOccupancy.plateId) FROM lotOccupancy WHERE lotOccupancy.lotId = parkingLots.lotId) AS occupancy FROM parkingLots');
   // send all lots at once
   res.status(200).send({
     lots: lots.rows
@@ -41,7 +41,7 @@ router.get('/self', validateSession, wrapAsync(async (req, res) => {
   }
 
   let lots = await db.query(
-    'SELECT lotId, userId, capacity, lotAddress, pricePerHour, lotDescription FROM parkingLots WHERE userId = $1',
+    'SELECT lotId, userId, capacity, lotAddress, pricePerHour, lotDescription, (SELECT COUNT(lotOccupancy.plateId) FROM lotOccupancy WHERE lotOccupancy.lotId = parkingLots.lotId) AS occupancy FROM parkingLots WHERE userId = $1',
     [req.session.userId]
   );
   res.status(200).send({
@@ -55,7 +55,10 @@ router.get('/self', validateSession, wrapAsync(async (req, res) => {
 router.get('/:lotId', wrapAsync(async (req, res) => {
   let lotId = req.params.lotId;
 
-  let query = (await db.query('SELECT userId, capacity, lotAddress, pricePerHour, lotDescription FROM parkingLots WHERE lotId = $1', [lotId]));
+  let query = (await db.query(
+    'SELECT userId, capacity, lotAddress, pricePerHour, lotDescription, (SELECT COUNT(lotOccupancy.plateId) FROM lotOccupancy WHERE lotId = $1) AS occupancy FROM parkingLots WHERE lotId = $1',
+    [lotId])
+  );
   if (!query.rows.length) {
     res.status(404).send({
       status: 'error',
@@ -70,8 +73,9 @@ router.get('/:lotId', wrapAsync(async (req, res) => {
     status: 'ok',
     userId: lot.userid,
     capacity: lot.capacity,
+    occupancy: +lot.occupancy,
     lotAddress: lot.lotaddress,
-    pricePerHour: lot.priceperhour,
+    pricePerHour: +lot.priceperhour,
     lotDescription: lot.lotdescription
   });
 }));
