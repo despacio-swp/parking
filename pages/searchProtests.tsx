@@ -72,10 +72,15 @@ export default function Search(this: any) {
     if (vals !== null) {
       console.log(vals);
       if (vals.length > 1) {
-        let filtered = vals.filter((protest: any) => protest.protestaddress.includes(query));
+        let filtered;
+        if(value === 'name') {
+          filtered = vals.filter((protest: any) => protest.protestname.toLowerCase().includes(query.toLowerCase()));
+        } else {
+          filtered = vals.filter((protest: any) => protest.protestaddress.toLowerCase().includes(query.toLowerCase()));
+        }
         let elements = filtered.map((protest: any) => protestSelector(protest.protestid, protest.protestname, protest.protestaddress));
         handleSort(elements);
-        if (sort == 'dsc') {
+        if (sort === 'dsc') {
           elements.reverse();
         }
         return elements;

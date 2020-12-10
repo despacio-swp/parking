@@ -53,9 +53,26 @@ router.get('/lots/current', validateSession, wrapAsync(async (req, res) => {
   });
 }));
 
-router.get('/users/:lotId', wrapAsync(async (req, res) => {
+router.get('/lots/current/address', validateSession, wrapAsync(async (req, res) => {
+  if (!req.session) {
+    res.status(404).send({
+      status: 'error',
+      error: 'NO_SESSION',
+      description: 'session does not exist'
+    });
+    return;
+  }
+  let lot = (await db.query('SELECT parkinglots.lotaddress, lotoccupancy.lotid, lotoccupancy.plateid FROM parkinglots LEFT JOIN parkinglots.lotid = lotoccupancy.lotid LEFT JOIN vehicles ON lotoccupancy.plateid = vehicles.plateid WHERE userid = $1', [req.session.userId]));
+  res.status(200).send({
+    status: 'ok',
+    lots: lot.rows
+  });
+}));
+
+
+router.get('/users/:lotid', wrapAsync(async (req, res) => {
   let lotid = req.params.lotId;
-  let users = await db.query('SELECT accounts.userId, accounts.firstName, accounts.lastName, accounts.email, lotoccupancy.plateid FROM lotOccupancy JOIN vehicles ON lotoccupancy.plateid = vehicles.plateid JOIN accounts ON vehicles.userid = accounts.userid WHERE lotOccupancy.lotid = $1', [lotid]);
+  let users = await db.query('SELECT accounts.userId, accounts.firstName, accounts.lastName, accounts.email, lotoccupancy.plateid FROM lotOccupancy JOIN vehicles ON lotoccupancy.plateid = vehicles.plateid JOIN accounts ON vehicles.userid = accounts.userid WHERE lotid = $1', [lotid]);
 
   //trying to send all lots at once
   res.status(200).send({
