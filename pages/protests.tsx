@@ -18,9 +18,27 @@ interface Protest {
     email: string;
 }
 
+interface EditProtest {
+    id: string;
+    name: string;
+    description: string;
+    location: string;
+    time: string;
+    email: string;
+}
+
 function ProtestCard(props: any) {
     const [expanded, setExpanded] = React.useState(false);
     const [anchorEl, setAnchorEl] = React.useState(null);
+
+    const [name, setName] = React.useState(props.protest.name);
+    const [description, setDescription] = React.useState(props.protest.description);
+    const [location, setLocation] = React.useState(props.protest.location);
+    const [time, setTime] = React.useState(props.protest.time);
+    const [email, setEmail] = React.useState(props.protest.email);
+
+    const [openEditDialog, setOpenEditDialog] = React.useState(false);
+
 
     const handleOpenMenu = (event: any) => {
         setAnchorEl(event.currentTarget);
@@ -31,16 +49,31 @@ function ProtestCard(props: any) {
     };
 
     const handleOpenEdit = () => {
-        props.openEdit();
+        setOpenEditDialog(true);
         handleCloseMenu();
     };
 
-    const handleDelete = () => {
-        props.onDelete();
+    const handleDelete = async () => {
+        await props.onDelete(props.protest.id);
         handleCloseMenu();
     };
 
-    return (
+    let handleEdit = async () => {
+        await props.onEdit({ id: props.protest.id, name, description, location, time, email });
+        setOpenEditDialog(false);
+    };
+
+    const error = (value: string) => {
+        return value === "";
+    };
+
+    const errorText = (value: string) => {
+        return error(value) ? "Empty field!" : "";
+    };
+
+    const anyError = name === "" || description === "" || location === "" || time === "" || email === "";
+
+    return <>
         <Grid item>
             <Card className={styles.card}>
                 <CardHeader
@@ -69,18 +102,59 @@ function ProtestCard(props: any) {
                 </Collapse>
             </Card>
         </Grid>
-    );
+        <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)}>
+            <DialogTitle> Edit Protest </DialogTitle>
+            <DialogContent>
+                <DialogContentText> Edit the protest name, description, location, and time of the protest </DialogContentText>
+                <TextField value={name} label="Name" margin="normal" fullWidth 
+                    onChange={event => setName(event.target.value)} 
+                    error={error(name)}
+                    helperText={errorText(name)}
+                    placeholder={props.protest.name}
+                />
+                <TextField value={description} label="Description" margin="normal" fullWidth 
+                    onChange={event => setDescription(event.target.value)} 
+                    error={error(description)}
+                    helperText={errorText(description)}
+                    placeholder={props.protest.description}
+                />
+                <TextField value={location} label="Location" margin="normal" fullWidth 
+                    onChange={event => setLocation(event.target.value)} 
+                    error={error(location)}
+                    helperText={errorText(location)}
+                    placeholder={props.protest.location}
+                />
+                <TextField value={time} label="Time" margin="normal" fullWidth 
+                    onChange={event => setTime(event.target.value)} 
+                    error={error(time)}
+                    helperText={errorText(time)}
+                    placeholder={props.protest.time}
+                />
+                <TextField value={email} label="Email" margin="normal" fullWidth 
+                    onChange={event => setEmail(event.target.value)} 
+                    error={error(email)}
+                    helperText={errorText(email)}
+                    placeholder={props.protest.email}
+                />
+            </DialogContent>
+            <DialogActions>
+                <Button color="primary" onClick={() => setOpenEditDialog(false)}> Cancel </Button>
+                <Button disabled={anyError} color="primary" onClick={handleEdit}> Save </Button>
+            </DialogActions>
+        </Dialog>
+    </>;
 }
 
 export default function ProtestPage() {
     const [protests, setProtests] = React.useState<Protest[]>([]);
+
     const [name, setName] = React.useState("");
     const [description, setDescription] = React.useState("");
     const [location, setLocation] = React.useState("");
     const [time, setTime] = React.useState("");
     const [email, setEmail] = React.useState("");
+
     const [openAddDialog, setOpenAddDialog] = React.useState(false);
-    const [openEditDialog, setOpenEditDialog] = React.useState(false);
 
     useEffect(() => void (async () => {
         let response = await axios.get('/api/v1/protests/all');
@@ -103,33 +177,32 @@ export default function ProtestPage() {
         setOpenAddDialog(true);
     };
 
-    const handleOpenEditDialog = (protest: Protest) => {
-        setName(protest.name);
-        setDescription(protest.description);
-        setLocation(protest.location);
-        setTime(protest.time);
-        setEmail(protest.email);
-        setOpenEditDialog(true);
-    };
-
-    const handleEdit = async (protest: Protest) => {
-        let response = await axios.put('/api/v1/protests/' + protest.id, { protestDate: time, protestName: name, email: email, protestAddress: location, protestDescription: description });
+    const handleEdit = async (protest: EditProtest) => {
+        let response = await axios.put('/api/v1/protests/' + protest.id, {
+            protestName: protest.name,
+            protestDescription: protest.description,
+            protestAddress: protest.location,
+            protestDate: protest.time,
+            email: protest.email
+        });
         let data = response.data;
-        let newData = Object.assign({}, protest, {
+        let oldProtestIndex = protests.findIndex(item => item.id === protest.id);
+        let oldProtest = protests[oldProtestIndex];
+        let newData: Protest = Object.assign({}, oldProtest, {
             name: data.protestName,
             description: data.protestDescription,
             location: data.protestAddress,
             time: data.protestDate,
             email: data.email
         });
-        setProtests([newData, ...protests.filter(item => item !== protest)]);
-        setOpenEditDialog(false);
+        let newProtests = protests.slice();
+        newProtests[oldProtestIndex] = newData;
+        setProtests(newProtests);
     };
 
     const handleAdd = async (name: string, description: string, location: string, time: string, email: string) => {
         let response = await axios.post('/api/v1/protests/protest', { protestDate: time, protestName: name, email: email, protestAddress: location, protestDescription: description });
         let data = response.data;
-        console.log(data);
         setProtests([...protests, {
             id: data.protestId,
             name: data.protestName,
@@ -141,9 +214,9 @@ export default function ProtestPage() {
         setOpenAddDialog(false);
     };
 
-    const handleDelete = async (protest: Protest) => {
-        let response = await axios.delete('/api/v1/protests/' + protest.id);
-        setProtests(protests.filter(item => item !== protest));
+    const handleDelete = async (protestId: string) => {
+        let response = await axios.delete('/api/v1/protests/' + protestId);
+        setProtests(protests.filter(item => item.id !== protestId));
     };
 
     const error = (value: string) => {
@@ -161,53 +234,13 @@ export default function ProtestPage() {
             <AppMenu page="Protests"/>
             <Grid container direction="column" alignItems="center">
                 {protests.map(protest =>
-                <React.Fragment key={protest.name}>
-                    <ProtestCard protest={protest}
-                        openEdit={() => handleOpenEditDialog(protest)}
-                        onEdit={() => handleEdit(protest)}
-                        onDelete={() => handleDelete(protest)}
+                    <ProtestCard 
+                        key={protest.id} 
+                        protest={protest}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
                     />
-                    <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)}>
-                        <DialogTitle> Edit Protest </DialogTitle>
-                        <DialogContent>
-                            <DialogContentText> Edit the protest name, description, location, and time of the protest </DialogContentText>
-                            <TextField value={name} label="Name" margin="normal" fullWidth 
-                                onChange={event => setName(event.target.value)} 
-                                error={error(name)}
-                                helperText={errorText(name)}
-                                placeholder={protest.name}
-                            />
-                            <TextField value={description} label="Description" margin="normal" fullWidth 
-                                onChange={event => setDescription(event.target.value)} 
-                                error={error(description)}
-                                helperText={errorText(description)}
-                                placeholder={protest.description}
-                            />
-                            <TextField value={location} label="Location" margin="normal" fullWidth 
-                                onChange={event => setLocation(event.target.value)} 
-                                error={error(location)}
-                                helperText={errorText(location)}
-                                placeholder={protest.location}
-                            />
-                            <TextField value={time} label="Time" margin="normal" fullWidth 
-                                onChange={event => setTime(event.target.value)} 
-                                error={error(time)}
-                                helperText={errorText(time)}
-                                placeholder={protest.time}
-                            />
-                            <TextField value={email} label="Email" margin="normal" fullWidth 
-                                onChange={event => setEmail(event.target.value)} 
-                                error={error(email)}
-                                helperText={errorText(email)}
-                                placeholder={protest.email}
-                            />
-                        </DialogContent>
-                        <DialogActions>
-                            <Button color="primary" onClick={() => setOpenEditDialog(false)}> Cancel </Button>
-                            <Button disabled={anyError} color="primary" onClick={() => handleEdit(protest)}> Save </Button>
-                        </DialogActions>
-                    </Dialog>
-                </React.Fragment>)}
+                )}
             </Grid>
             <Fab className={styles.fab} onClick={handleOpenAddDialog} color="primary">
                 <Add />
