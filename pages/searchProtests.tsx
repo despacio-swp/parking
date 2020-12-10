@@ -29,8 +29,7 @@ export default function Search(this: any) {
         idList.push(protest.protestId);
         protestList.push({ protestId: protest.protestId, protestName: protest.protestName, protestAddress: protest.protestAddress });
       });
-    }
-    catch (err) {
+    } catch (err) {
       if (err.response) response = err.response;
       else throw err;
     }

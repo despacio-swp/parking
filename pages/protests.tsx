@@ -83,7 +83,7 @@ export default function ProtestPage() {
     const [openEditDialog, setOpenEditDialog] = React.useState(false);
 
     useEffect(() => void (async () => {
-        let response = await axios.get('/api/v1/protests/all');
+        let response = await axios.get('/api/v1/protests/self');
         setProtests(response.data.protests.map((protest: any) => ({
             id: protest.protestid,
             name: protest.protestname,
