@@ -79,6 +79,9 @@ function profile() {
     setFirstName(response.data.firstName);
     setLastName(response.data.lastName);
     setEmail(response.data.email);
+    setFirstNameTemp(response.data.firstName);
+    setLastNameTemp(response.data.lastName);
+    setEmailTemp(response.data.email);
     // we are done loading
     setUpdateLoading(false);
     setOpen(false);
@@ -155,6 +158,7 @@ function profile() {
           <Typography variant="h6" align="left">Email: {email}</Typography>
           <Typography variant="h6" align="left">Car Information</Typography>
           {platesList}
+          <Button variant="contained" onClick={() => setOpenAdd(true)} >Add Vehicle</Button>
         </Grid>
       </Paper>
       <Fab className={styles.fab} onClick={() => setOpen(true)} color="primary" aria-label="edit">
@@ -175,9 +179,6 @@ function profile() {
           </Button>
         </DialogActions>
       </Dialog>
-      <Fab className={styles.fab2} onClick={() => setOpenAdd(true)} color="primary" aria-label="edit">
-        <Add />
-      </Fab>
       <Dialog open={openAdd} onClose={() => setOpenAdd(false)}>
         <DialogTitle> Add Vehicle License Plate </DialogTitle>
         <DialogContent>
@@ -196,7 +197,6 @@ function profile() {
       <title>User Profile</title>
     </Head>
     <AppMenu page="User Profile" />
-    <p>test: userid {userId}</p>
     {contents}
   </React.Fragment>;
 }

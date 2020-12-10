@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import Head from 'next/head';
 import AppMenu from '../../components/AppMenu';
-import { Paper, Box, TextField, Typography, Grid, Dialog, DialogTitle } from '@material-ui/core';
+import { Paper, Box, TextField, Typography, Grid, Dialog, DialogContentText } from '@material-ui/core';
 import styles from './userProfile.module.scss';
 import Button from '@material-ui/core/Button';
 import axios, { AxiosResponse } from 'axios';
@@ -168,7 +168,7 @@ export default function profile() {
         {parkMessage}
         <Button variant="contained" onClick={() => setOpen(true)} >Park Here</Button>
         <Dialog open={open} onClose={() => setOpen(false)}>
-          <DialogTitle>Choose the vehicle that you would like to use to park with.</DialogTitle>
+          <DialogContentText>Choose the vehicle that you would like to use to park with.</DialogContentText>
           {vehicleList}
           <Link href={"/searchLots/"} passHref>
             <Button variant="contained" onClick={() => handleClose()}> Cancel </Button>
