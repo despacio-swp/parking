@@ -32,6 +32,16 @@ router.get('/all', wrapAsync(async (req, res) => {
   });
 }));
 
+router.get('/by-protest/:protestId', wrapAsync(async (req, res) => {
+  let query = await db.query('SELECT linkId, protestId, parkingLots.lotId, parkingLots.lotDescription FROM links JOIN parkingLots ON parkingLots.lotId = links.lotId WHERE protestId = $1', [req.params.protestId]);
+  res.status(200).send(query.rows.map(row => ({
+    linkId: row.linkid,
+    protestId: row.protestid,
+    lotId: row.lotid,
+    lotDescription: row.lotdescription
+  })));
+}));
+
 /*
   GET REQUEST
 */
@@ -67,7 +77,7 @@ router.put('/:linkId', wrapAsync(async (req, res) => {
 
   let link = (await db.query('UPDATE links SET protestId = $2, lotId = $3 WHERE linkId = $1 ' +
     'ON CONFLICT DO NOTHING', [linkId, protestId, lotId]));
-  
+
   res.status(200).send({
     status: 'ok',
     linkId: linkId,
@@ -89,11 +99,9 @@ let createLinkSchema = ajv.compile({
   DELETE Request
 */
 router.delete('/:linkId', validateSession, wrapAsync(async (req, res) => {
-  
+  let linkId = req.params.linkId;
 
-  let lotId = req.params.lotId;
-
-  let query = await db.query('DELETE FROM links WHERE linkId = $1', [lotId]);
+  let query = await db.query('DELETE FROM links WHERE linkId = $1', [linkId]);
   if (!query.rowCount) {
     res.status(404).send({
       status: 'error',
@@ -109,7 +117,6 @@ router.delete('/:linkId', validateSession, wrapAsync(async (req, res) => {
   POST REQUEST
 */
 router.post('/link', validateSession, wrapAsync(async (req, res) => {
-  
   if (!createLinkSchema(req.body)) {
     res.status(400).send({
       status: 'error',

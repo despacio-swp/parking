@@ -6,7 +6,7 @@ import { randomBytes } from 'crypto';
  * @param fn
  * @return
  */
-export function wrapAsync(fn: express.RequestHandler): express.RequestHandler {
+export function wrapAsync(fn: (...params: Parameters<express.RequestHandler>) => Promise<any>): express.RequestHandler {
   return (req, res, next) => fn(req, res, next).catch(next);
 }
 

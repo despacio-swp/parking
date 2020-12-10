@@ -29,8 +29,7 @@ export default function Search(this: any) {
         idList.push(protest.protestId);
         protestList.push({ protestId: protest.protestId, protestName: protest.protestName, protestAddress: protest.protestAddress });
       });
-    }
-    catch (err) {
+    } catch (err) {
       if (err.response) response = err.response;
       else throw err;
     }
@@ -54,8 +53,8 @@ export default function Search(this: any) {
             <div className={styles.listButton}>
               <ListItemSecondaryAction>
                 <Link href={"/ProtestProfile/" + protestId} passHref>
-                  <Button variant="contained" color="primary">
-                    Select
+                  <Button variant="text" color="primary">
+                    More Info
                   </Button>
                 </Link>
               </ListItemSecondaryAction>
