@@ -13,13 +13,15 @@ let app = express();
 
 app.set('trust proxy', 'loopback');
 
-app.use(morgan('combined', {
+let logger = morgan('combined', {
   stream: {
     write(line) {
       log.info(line.replace(/\n$/g, ''));
     }
   }
-}));
+});
+
+app.use(logger);
 
 // web application
 nextApp.prepare().then(() => {

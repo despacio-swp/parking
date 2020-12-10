@@ -6,12 +6,13 @@ import styles from './userProfile.module.scss';
 import Button from '@material-ui/core/Button';
 import axios, { AxiosResponse } from 'axios';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import accountsService from '../../client/accountsService';
 
 export default function profile() {
-
   let userid = accountsService.userId;
-  let lotid: string | undefined = "";
+  let router = useRouter();
+  let lotid = router.query.lotid as string | undefined;
 
   let [open, setOpen] = React.useState(false);
   let [lotData, setLotData] = React.useState({ capacity: 0, location: '', price: 0, description: '' });
@@ -25,10 +26,7 @@ export default function profile() {
   async function getData() {
     let response;
     try {
-      const last = window.location.href.split('/lotProfile/').pop();
-      lotid = last;
-
-      response = await axios.get('/api/v1/lots/' + last);
+      response = await axios.get('/api/v1/lots/' + lotid);
 
       let occ;
       if (await getOccupancy()) {
@@ -54,25 +52,20 @@ export default function profile() {
     let response;
     try {
       response = await axios.get('/api/v1/presence/lots/' + lotid);
-    }
-    catch (err) {
+    } catch (err) {
       return null;
     }
-    return response
+    return response;
   }
   const handleClose = () => {
     setOpen(false);
   };
 
   const handlePark = async (plateid: string) => {
-    try {
-      let response = await axios.post('/api/v1/presence/lots/' + lotid + '/' + plateid);
-    } catch (err) {
-      console.log("Oops!  You're already parked here!")
-    }
+    let response = await axios.post('/api/v1/presence/lots/' + lotid + '/' + plateid);
     setParked(true);
     handleClose();
-  }
+  };
 
   useEffect(() => {
     if (userid === null) return;

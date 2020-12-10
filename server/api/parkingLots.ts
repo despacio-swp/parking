@@ -19,6 +19,23 @@ router.get('/', (_req, res) => res.send({ status: 'ok' }));
 
 // TODO: use ajv more
 
+router.get('/autocomplete', wrapAsync(async (req, res) => {
+  if (!req.query.query) {
+    res.status(400).send({
+      status: 'error',
+      error: 'NO_INPUT',
+      description: 'no query provided'
+    });
+    return;
+  }
+  let results = await db.query('SELECT lotid, lotdescription, lotaddress FROM parkingLots ORDER BY LEAST(levenshtein($1, lotDescription, 1, 5, 5), levenshtein($1, lotAddress, 1, 5, 5)) LIMIT 20', [req.query.query]);
+  res.status(200).send(results.rows.map(row => ({
+    lotId: row.lotid,
+    name: row.lotdescription,
+    address: row.lotaddress
+  })));
+}));
+
 /*
   GET REQUEST for All Lots
 */

@@ -54,8 +54,8 @@ export default function Search(this: any) {
             <div className={styles.listButton}>
               <ListItemSecondaryAction>
                 <Link href={"/ProtestProfile/" + protestId} passHref>
-                  <Button variant="contained" color="primary">
-                    Select
+                  <Button variant="text" color="primary">
+                    More Info
                   </Button>
                 </Link>
               </ListItemSecondaryAction>

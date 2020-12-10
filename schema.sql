@@ -57,3 +57,5 @@ CREATE TABLE lotOccupancy (
     lotId text REFERENCES parkingLots (lotId) ON DELETE CASCADE NOT NULL,
     UNIQUE (plateId, lotId)
 );
+
+CREATE EXTENSION fuzzystrmatch;
