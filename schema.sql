@@ -48,12 +48,12 @@ CREATE TABLE protests (
 
 CREATE TABLE links (
     linkId text PRIMARY KEY,
-    protestId text REFERENCES protests (protestId) NOT NULL,
-    lotId text REFERENCES parkingLots (lotId) NOT NULL
+    protestId text REFERENCES protests (protestId) NOT NULL ON DELETE CASCADE,
+    lotId text REFERENCES parkingLots (lotId) NOT NULL ON DELETE CASCADE
 );
 
 CREATE TABLE lotOccupancy (
-    plateId text REFERENCES vehicles (plateId) NOT NULL,
-    lotId text REFERENCES parkingLots (lotId) NOT NULL,
+    plateId text REFERENCES vehicles (plateId) NOT NULL ON DELETE CASCADE,
+    lotId text REFERENCES parkingLots (lotId) NOT NULL ON DELETE CASCADE,
     UNIQUE (plateId, lotId)
 );
